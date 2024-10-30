@@ -1,23 +1,21 @@
 package com.academy.creator_hub.dto;
 
-import com.academy.creator_hub.entity.Video;
+import com.google.api.client.util.DateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VideoDto implements Serializable {
+public class VideoDto {
     private String videoId;
     private String title;
+    private String thumbnailUrl;
     private BigInteger viewCount;
-    private String url;
-
-    public Video toEntity() {
-        return new Video(videoId, title, viewCount, url);
-    }
+    private DateTime publishedAt;
+    private String duration;
 }

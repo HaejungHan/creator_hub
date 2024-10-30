@@ -11,12 +11,9 @@ public class SparkConfig {
 
     @Bean
     public SparkSession sparkSession() {
-        if (sparkSession == null) {
-            sparkSession = SparkSession.builder()
-                    .appName("YourAppName")
-                    .master("local[*]")
-                    .getOrCreate();
-        }
-        return sparkSession;
+        return SparkSession.builder()
+                .appName("YouTube Analysis")
+                .master("local[*]")
+                .getOrCreate();
     }
 }
