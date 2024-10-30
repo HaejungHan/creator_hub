@@ -48,99 +48,141 @@ $(document).ready(function () {
         }
     });
 
-    function performSearch() {
-        const searchTerm = searchInput.val().trim();
-        if (searchTerm) {
-            searchResults.show();
-            searchResultsGrid.empty();
+    $(document).ready(function() {
+        function parseDuration(duration) {
+            const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+            const matches = duration.match(regex);
 
-            const searchQueries = [
-                { title: `"${searchTerm}" 완벽 가이드`, views: '12.5만', date: '3일 전', duration: '18:42' },
-                { title: `${searchTerm} 성공 비결 대공개`, views: '8.2만', date: '1주일 전', duration: '12:15' },
-                { title: `${searchTerm} 트렌드 분석`, views: '15.7만', date: '5일 전', duration: '21:30' }
-            ];
+            const hours = matches[1] ? parseInt(matches[1]) : 0;
+            const minutes = matches[2] ? parseInt(matches[2]) : 0;
+            const seconds = matches[3] ? parseInt(matches[3]) : 0;
 
-            searchQueries.forEach(result => {
-                const videoCard = generateVideoCard(result);
-                searchResultsGrid.append(videoCard);
-            });
-        } else {
-            searchResults.hide();
+            const parts = [];
+            if (hours) parts.push(`${hours}시간`);
+            if (minutes) parts.push(`${minutes}분`);
+            if (seconds) parts.push(`${seconds}초`);
+
+            return parts.join(' ') || '0초';
         }
-    }
 
-    function generateVideoCard(data) {
-        return `
-            <div class="video-card">
-                <div class="thumbnail">
-                    <img src="https://picsum.photos/400/225?random=${Math.random()}" alt="${data.title}">
-                    <span class="duration">${data.duration}</span>
-                </div>
-                <div class="video-info">
-                    <h3 class="video-title">${data.title}</h3>
-                    <div class="video-stats">
-                        <span class="views">
-                            <i class="fas fa-eye"></i>
-                            ${data.views}
-                        </span>
-                        <span class="upload-date">
-                            <i class="far fa-clock"></i>
-                            ${data.date}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
+        function formatPublishedDate(publishedAt) {
+            const publishDate = new Date(publishedAt.value);
+            const now = new Date();
+            const timeDiff = now - publishDate; // 밀리초 차이
+            const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24)); // 일 수로 변환
 
-    searchButton.on('click', performSearch);
-    searchInput.on('keypress', function (e) {
-        if (e.key === 'Enter') performSearch();
-    });
+            if (daysDiff < 1) {
+                return "오늘";
+            } else if (daysDiff === 1) {
+                return "어제";
+            } else {
+                return `${daysDiff}일 전`;
+            }
+        }
 
-    $('.menu-item').on('click', function () {
-        $('.menu-item').removeClass('active');
-        $(this).addClass('active');
-    });
+        function loadPopularVideos() {
+            $.ajax({
+                url: '/api/popular', // API endpoint
+                method: 'GET',
+                success: function(videos) {
+                    const popularVideosGrid = $('#popularVideos');
+                    popularVideosGrid.empty(); // 기존 내용 비우기
 
-    const popularTitles = [
-        "2024 유튜브 알고리즘 완벽 분석",
-        "초보 크리에이터를 위한 장비 세팅",
-        "매출 1억 유튜버의 비밀",
-        "영상편집 마스터 클래스",
-        "조회수 폭발하는 썸네일 제작법",
-        "유튜브 수익화 가이드"
-    ];
+                    videos.forEach(video => {
+                        const readableDuration = parseDuration(video.duration); // 변환된 지속 시간
+                        const readablePublishedDate = formatPublishedDate(video.publishedAt); // 변환된 게시 날짜
+                        const videoCard = `
+                    <div class="video-card">
+    <div class="thumbnail">
+        <img src="${video.thumbnailUrl.replace('default.jpg', 'hqdefault.jpg')}" alt="${video.title}">
+        <span class="duration">${readableDuration}</span>
+    </div>
+    <div class="video-info">
+        <h3 class="video-title">${video.title}</h3>
+        <div class="video-stats">
+            <span class="views">
+                <i class="fas fa-eye"></i>
+                ${video.viewCount} views
+            </span>
+            <span class="upload-date">
+                <i class="far fa-clock"></i>
+                ${readablePublishedDate}
+            </span>
+        </div>
+    </div>
+</div>`;
+                        popularVideosGrid.append(videoCard);
+                    });
+                },
+                error: function(err) {
+                    console.error('Error loading popular videos:', err);
+                }
+            });
+        }
 
-    const recommendedTitles = [
-        "브이로그 촬영 꿀팁 모음",
-        "유튜브 채널 성장 전략",
-        "크리에이터 번아웃 극복하기",
-        "1인 미디어 성공 사례",
-        "유튜브 쇼츠 활용법",
-        "구독자 10만 달성 노하우"
-    ];
+        function performSearch() {
+            const query = $('#searchInput').val().trim();
+            if (query) {
+                $.ajax({
+                    url: '/api/search', // API endpoint
+                    method: 'GET',
+                    data: { query: query },
+                    success: function(videos) {
+                        const searchResultsGrid = $('#searchResultsGrid');
+                        searchResultsGrid.empty(); // 기존 내용 비우기
 
-    function populateVideoGrid(gridId, titles) {
-        const $grid = $('#' + gridId);
-        titles.forEach(title => {
-            const views = Math.floor(Math.random() * 50) + 5;
-            const days = Math.floor(Math.random() * 7) + 1;
-            const minutes = Math.floor(Math.random() * 20) + 5;
-            const seconds = Math.floor(Math.random() * 59);
+                        videos.forEach(video => {
+                            const readableDuration = parseDuration(video.duration); // 변환된 지속 시간
+                            const readablePublishedDate = formatPublishedDate(video.publishedAt); // 변환된 게시 날짜
+                            const videoCard = `
+                        <div class="video-card">
+    <div class="thumbnail">
+        <img src="${video.thumbnailUrl.replace('default.jpg', 'hqdefault.jpg')}" alt="${video.title}">
+        <span class="duration">${readableDuration}</span>
+    </div>
+    <div class="video-info">
+        <h3 class="video-title">${video.title}</h3>
+        <div class="video-stats">
+            <span class="views">
+                <i class="fas fa-eye"></i>
+                ${video.viewCount} views
+            </span>
+            <span class="upload-date">
+                <i class="far fa-clock"></i>
+                ${readablePublishedDate}
+            </span>
+        </div>
+    </div>
+</div>`;
+                            searchResultsGrid.append(videoCard);
+                        });
+                    },
+                    error: function(err) {
+                        console.error('Error searching videos:', err);
+                    }
+                });
+            }
+        }
 
-            const videoData = {
-                title: title,
-                views: views + '만',
-                date: days + '일 전',
-                duration: `${minutes}:${seconds.toString().padStart(2, '0')}`
-            };
-
-            const videoCard = generateVideoCard(videoData);
-            $grid.append(videoCard);
+        $('#searchButton').on('click', function(e) {
+            e.preventDefault(); // 기본 폼 제출 방지
+            performSearch();
         });
-    }
 
-    populateVideoGrid('popularVideos', popularTitles);
-    populateVideoGrid('recommendedVideos', recommendedTitles);
+        // 페이지 로드 시 인기 동영상 로드
+        loadPopularVideos();
+
+        // Enter 키로 검색
+        $('#searchInput').on('keypress', function(e) {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        // 메뉴 항목 클릭 시 활성화 효과
+        $('.menu-item').on('click', function() {
+            $('.menu-item').removeClass('active');
+            $(this).addClass('active');
+        });
+    });
+
+
 });

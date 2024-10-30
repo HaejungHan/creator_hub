@@ -58,7 +58,7 @@
     <div class="main-content">
         <div class="search-container">
             <div class="search-bar">
-                <input type="text" placeholder="영감을 찾아보세요..." id="searchInput">
+                <input type="text" id="searchInput" placeholder="검색어를 입력하세요" required>
                 <button id="searchButton">
                     <i class="fas fa-search"></i>
                     검색
@@ -87,7 +87,7 @@
             </div>
         </div>
 
-        <div class="content-section" id="searchResults" style="display: none;">
+        <div class="content-section" id="searchResults" style="display: block;">
             <div class="section-header">
                 <h2 class="section-title">검색 결과</h2>
             </div>

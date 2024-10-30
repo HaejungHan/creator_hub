@@ -20,10 +20,8 @@ public class YouTubeTrendAnalyzer {
     }
 
     public void analyzeTrends(List<VideoAnalyzeDto> videos) {
-        // VideoAnalyzeDto로 데이터프레임 생성
         Dataset<Row> videoDF = spark.createDataFrame(videos, VideoAnalyzeDto.class);
 
-        // 트렌드 분석: 조회수, 좋아요 수 평균 계산
         videoDF.groupBy("title") // title을 기준으로 그룹화
                 .agg(
                         org.apache.spark.sql.functions.sum("viewCount").alias("total_views"),
