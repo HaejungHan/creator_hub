@@ -2,11 +2,12 @@ package com.academy.creator_hub.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
 import java.math.BigInteger;
 
-@Table(name = "videos")
+@Document(collation = "videos")
 @Entity
 @Getter
 @NoArgsConstructor
