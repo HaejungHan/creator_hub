@@ -1,8 +1,8 @@
 package com.academy.creator_hub.repository;
 
-import com.academy.creator_hub.entity.Video;
+import com.academy.creator_hub.entity.Videos;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 
-public interface VideoRepository extends MongoRepository<Video, Long> {
+public interface VideoRepository extends MongoRepository<Videos, Long> {
 }

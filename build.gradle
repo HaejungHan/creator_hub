@@ -37,24 +37,22 @@ dependencies {
     implementation 'com.google.api-client:google-api-client:1.33.0'
     implementation 'com.google.apis:google-api-services-youtube:v3-rev20230816-2.0.0'
     implementation 'com.google.http-client:google-http-client-jackson2:1.39.2'
-    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.23.0' // OAuth 클라이언트
     // Spark 의존성 추가
     implementation 'org.apache.spark:spark-core_2.12:3.5.3'
     implementation 'org.apache.spark:spark-sql_2.12:3.5.3'
     implementation 'org.apache.spark:spark-streaming_2.12:3.5.3'
     // MongoDB
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-
     // Janino 의존성 추가
     implementation 'org.codehaus.janino:janino:3.1.4'
 
-    // Spring
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.18'
-//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.18'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.18'
+    // spring batch
+    implementation 'org.springframework.batch:spring-batch-core'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
 
-//    implementation 'mysql:mysql-connector-java:8.0.23'
-    implementation 'org.hibernate:hibernate-core:5.6.14.Final'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-logging'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.projectlombok:lombok'

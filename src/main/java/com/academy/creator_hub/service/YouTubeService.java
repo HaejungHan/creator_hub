@@ -10,6 +10,7 @@ import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -45,8 +46,6 @@ public class YouTubeService {
                 .map(this::mapToVideoDto)
                 .collect(Collectors.toList());
     }
-
-
 
     public List<VideoDto> searchVideos(String query) throws IOException {
         if (query == null || query.trim().isEmpty()) {
@@ -87,20 +86,6 @@ public class YouTubeService {
         }
 
         return null;
-    }
-
-
-    public List<VideoAnalyzeDto> fetchTrendingVideos(String regionCode) throws IOException {
-        YouTube.Videos.List request = youtube.videos()
-                .list(Collections.singletonList("snippet,contentDetails,statistics"))
-                .setChart("mostPopular")
-                .setRegionCode(regionCode)
-                .setMaxResults(10L);
-
-        VideoListResponse response = request.execute();
-        return response.getItems().stream()
-                .map(this:: mapToVideoAnalyzeDto)
-                .collect(Collectors.toList());
     }
 
     private VideoAnalyzeDto mapToVideoAnalyzeDto(Video video) {
