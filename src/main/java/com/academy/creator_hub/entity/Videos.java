@@ -4,13 +4,15 @@ import com.google.api.client.util.DateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
-@Document(collation = "videos")
+@Document(collection = "videos")
 @Getter
 @NoArgsConstructor
 public class Videos {
@@ -19,12 +21,12 @@ public class Videos {
     private String title;
     private String thumbnailUrl;
     private BigInteger viewCount;
-    private DateTime publishedAt;
+    private LocalDateTime publishedAt;
     private String duration;
     private String videoUrl;
 
     public Videos(String videoId, String title, String thumbnailUrl, BigInteger viewCount,
-                 DateTime publishedAt, String duration, String videoUrl) {
+                 LocalDateTime publishedAt, String duration, String videoUrl) {
         this.videoId = videoId;
         this.title = title;
         this.thumbnailUrl = thumbnailUrl;
