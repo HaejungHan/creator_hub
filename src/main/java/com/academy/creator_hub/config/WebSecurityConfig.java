@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class WebSecurityConfig extends WebSecurityConfiguration {
+public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
@@ -49,7 +49,7 @@ public class WebSecurityConfig extends WebSecurityConfiguration {
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil,userRepository);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
-        filter.setFilterProcessesUrl("/api/login");
+        filter.setFilterProcessesUrl("/login");
         return filter;
     }
 
@@ -61,8 +61,11 @@ public class WebSecurityConfig extends WebSecurityConfiguration {
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                                .requestMatchers("/signup").permitAll() // api 경로에 맞게 수정
-                                .requestMatchers("/login").permitAll() // api 경로에 맞게 수정
+                                .antMatchers("/signup").permitAll() // api 경로에 맞게 수정
+                                .antMatchers("/login").permitAll() // api 경로에 맞게 수정
+                                .antMatchers("/main").permitAll()
+                                .antMatchers("/api/popular").permitAll()
+                                .antMatchers("/api/search").permitAll()
                                 .anyRequest().authenticated()
                 );
 

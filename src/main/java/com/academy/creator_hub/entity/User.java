@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 @Document(collection = "users")
@@ -15,11 +17,11 @@ public class User extends Timestamped {
     private UserRoleEnum role;
     private UserStatus userStatus;
     private String refreshToken;
+    private List<Interest> Interests;
 
     public void updateRefresh(String refreshToken) {
         this.refreshToken = refreshToken;
     }
-
     public void updateStatus(UserStatus userStatus) {
         this.userStatus = userStatus;
     }
@@ -29,12 +31,14 @@ public class User extends Timestamped {
     }
 
     public User (
-            String username, String password, UserRoleEnum role, UserStatus userStatus,
-            String refreshToken) {
+            String username, String password, String name,UserRoleEnum role, UserStatus userStatus,
+            String refreshToken, List<Interest> interests) {
         this.username = username;
         this.password = password;
+        this.name = name;
         this.role = role;
         this.userStatus = userStatus;
         this.refreshToken = refreshToken;
+        this.Interests = interests;
     }
 }

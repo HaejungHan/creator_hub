@@ -1,12 +1,15 @@
 package com.academy.creator_hub.dto;
 
+import com.academy.creator_hub.entity.Interest;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -24,4 +27,6 @@ public class SignupRequestDto {
     @NotBlank(message = "사용자의 이름을 입력하세요.")
     private String name;
 
+    @NotNull(message = "관심사는 필수 선택 사항입니다.")
+    private List<Interest> interests;
 }

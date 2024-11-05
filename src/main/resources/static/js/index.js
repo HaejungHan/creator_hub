@@ -184,5 +184,93 @@ $(document).ready(function () {
         });
     });
 
+    document.addEventListener('DOMContentLoaded', function() {
+        const videoData = {
+            id: 'dQw4w9WgXcQ',
+            title: 'Sample Video 1',
+            views: '1M',
+            date: '2023-06-01',
+            analytics: {
+                views: '1,000,000',
+                watchTime: '50,000',
+                likes: '50,000',
+                subscribers: '1,000',
+                avgWatchTime: '4:30',
+                comments: '2,500',
+                weeklyViews: [60, 75, 85, 95, 100, 90, 80], // Percentage values for bar chart
+                demographics: [40, 80, 95, 60, 30, 20], // Percentage values for demographic bars
+                devices: {
+                    mobile: 45,
+                    desktop: 30,
+                    tablet: 25
+                }
+            }
+        };
+
+        setTimeout(() => {
+            openVideoModal(videoData);
+        }, 500);
+
+        document.querySelectorAll('.video-card').forEach(card => {
+            card.addEventListener('click', function() {
+                openVideoModal(videoData);
+            });
+        });
+
+        document.querySelector('.video-modal-close').addEventListener('click', function() {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoPlayer').src = '';
+        });
+
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('videoModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                document.getElementById('videoPlayer').src = '';
+            }
+        });
+
+        function openVideoModal(videoData) {
+            document.getElementById('modalVideoTitle').textContent = videoData.title;
+            document.getElementById('modalVideoViews').textContent = `${videoData.views} views`;
+            document.getElementById('modalVideoDate').textContent = videoData.date;
+            document.getElementById('videoPlayer').src = `https://www.youtube.com/embed/${videoData.id}`;
+
+            updateAnalytics(videoData.analytics);
+
+            document.getElementById('videoModal').style.display = 'block';
+        }
+
+        function updateAnalytics(data) {
+            // Update analytics cards
+            const cards = document.querySelectorAll('.analytics-value');
+            cards[0].textContent = data.views;
+            cards[1].textContent = data.watchTime;
+            cards[2].textContent = data.likes;
+            cards[3].textContent = data.subscribers;
+            cards[4].textContent = data.avgWatchTime;
+            cards[5].textContent = data.comments;
+
+            // Update bar chart
+            document.querySelectorAll('.bar').forEach((bar, index) => {
+                bar.style.height = `${data.weeklyViews[index]}%`;
+                bar.setAttribute('data-value', `${data.weeklyViews[index]}K`);
+            });
+
+            // Update demographic bars
+            document.querySelectorAll('.demographic-bar').forEach((bar, index) => {
+                bar.style.height = `${data.demographics[index]}%`;
+                bar.style.setProperty('--delay', `${index * 0.1}s`);
+            });
+
+            // Update device distribution
+            const devicePie = document.querySelector('.device-pie');
+            devicePie.style.background = `conic-gradient(
+            #1a73e8 0% ${data.devices.mobile}%,
+            #34a853 ${data.devices.mobile}% ${data.devices.mobile + data.devices.desktop}%,
+            #ea4335 ${data.devices.mobile + data.devices.desktop}% 100%
+        )`;
+        }
+    });
 
 });

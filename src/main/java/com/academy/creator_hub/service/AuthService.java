@@ -28,14 +28,14 @@ public class AuthService {
         if (checkUser.isPresent()) {
             throw new IllegalArgumentException("중복된 사용자 입니다.");
         }
+        if (requestDto.getInterests() == null || requestDto.getInterests().size() != 3) {
+            throw new IllegalArgumentException("관심사는 3개를 선택해야 합니다.");
+        }
 
         UserRoleEnum role = UserRoleEnum.USER;
 
-        User user = new User(requestDto.getUsername(), requestDto.getPassword(), requestDto.getName)
-                .userStatus(UserStatus.NORMAL)
-                .role(role)
-                .refreshToken("")
-                .build();
+        User user = new User(username, password, requestDto.getName(), role,
+                UserStatus.NORMAL, "", requestDto.getInterests());
 
         userRepository.save(user);
     }
