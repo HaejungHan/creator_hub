@@ -2,6 +2,8 @@ package com.academy.creator_hub.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -10,7 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @Document(collection = "users")
 public class User extends Timestamped {
+    @Id
+    private String id;
 
+    @Indexed(unique = true)
     private String username;
     private String name;
     private String password;

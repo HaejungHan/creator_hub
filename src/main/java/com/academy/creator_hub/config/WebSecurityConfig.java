@@ -5,39 +5,48 @@ import com.academy.creator_hub.repository.UserRepository;
 import com.academy.creator_hub.security.JwtAuthenticationFilter;
 import com.academy.creator_hub.security.JwtAuthorizationFilter;
 import com.academy.creator_hub.security.UserDetailsServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
-public class WebSecurityConfig {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-    private final AuthenticationConfiguration authenticationConfiguration;
     private final UserRepository userRepository;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, UserRepository userRepository) {
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable()  // CSRF 보호 비활성화 (필요시 활성화)
+                .authorizeRequests()
+                .antMatchers("/css/**", "/js/**", "/images/**", "/main", "/signup", "/login", "/api/popular", "/api/search", "/api/video/**").permitAll()
+                .antMatchers("/api/save-playback-time").authenticated()// 정적 리소스 및 인증 없이 접근 가능한 경로 허용
+                .anyRequest().authenticated();  // 나머지 경로는 인증이 필요
+
+        // JWT 인증 및 인가 필터 추가
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, userRepository);
+        filter.setAuthenticationManager(authenticationManager());
+        filter.setFilterProcessesUrl("/login");  // 로그인 경로 설정
+        return filter;
     }
 
     @Bean
@@ -46,34 +55,9 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil,userRepository);
-        filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
-        filter.setFilterProcessesUrl("/login");
-        return filter;
-    }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorizeHttpRequests ->
-                        authorizeHttpRequests
-                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                                .antMatchers("/signup").permitAll() // api 경로에 맞게 수정
-                                .antMatchers("/login").permitAll() // api 경로에 맞게 수정
-                                .antMatchers("/main").permitAll()
-                                .antMatchers("/api/popular").permitAll()
-                                .antMatchers("/api/search").permitAll()
-                                .antMatchers("/api/video/**").permitAll()
-                                .anyRequest().authenticated()
-                );
-
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
-
-        return http.build();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
+
 

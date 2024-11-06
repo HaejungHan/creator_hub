@@ -35,6 +35,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
+
+        if (req.getRequestURI().equals("/main") || req.getRequestURI().equals("/signup") || req.getRequestURI().equals("/api/video/**")||  req.getRequestURI().equals("/api/popular") ||req.getRequestURI().equals("/api/search")|| req.getRequestURI().equals("/login")) {
+            log.info("Skipping authentication for {}", req.getRequestURI());
+            filterChain.doFilter(req, res);
+            return;
+        }
+
         log.info("Attempting authentication for user: {}", req.getHeader(JwtUtil.AUTHORIZATION_HEADER));
 
         String tokenValue = jwtUtil.getTokenFromRequest(req);
