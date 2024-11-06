@@ -4,11 +4,9 @@ package com.academy.creator_hub.controller;
 import com.academy.creator_hub.dto.VideoDto;
 import com.academy.creator_hub.service.YouTubeService;
 import com.academy.creator_hub.service.YouTubeTrendAnalyzer;
+import com.google.api.services.youtube.model.Video;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +27,11 @@ public class YoutubeController {
     @GetMapping("/popular")
     public List<VideoDto> getPopularVideos() throws IOException {
         return youTubeService.getPopularVideos();
+    }
+
+    @GetMapping("/video/{id}")
+    public Video getVideoById(@PathVariable String id) throws IOException {
+        return youTubeService.getVideoId(id);
     }
 
 }

@@ -66,6 +66,7 @@ public class WebSecurityConfig {
                                 .antMatchers("/main").permitAll()
                                 .antMatchers("/api/popular").permitAll()
                                 .antMatchers("/api/search").permitAll()
+                                .antMatchers("/api/video/**").permitAll()
                                 .anyRequest().authenticated()
                 );
 

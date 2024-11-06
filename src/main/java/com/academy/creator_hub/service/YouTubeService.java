@@ -10,7 +10,6 @@ import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -115,5 +114,47 @@ public class YouTubeService {
                 searchResult.getSnippet().getThumbnails().getDefault().getUrl()
         );
     }
+
+    public Video getVideoId(String id) throws IOException {
+        YouTube.Videos.List request = youtube.videos()
+                .list(Collections.singletonList("snippet,contentDetails,statistics"))
+                .setId(Collections.singletonList(id))
+                .setKey(API_KEY);
+
+        VideoListResponse response = request.execute();
+        if (response.getItems().isEmpty()) {
+            return null;
+        }
+        return response.getItems().get(0);
+    }
+
+
+//    private VideoAnalyzeDto mapToVideoAnalyzeDto(Video video) {
+//        String id = video.getId();
+//        String title = video.getSnippet().getTitle();
+//        BigInteger viewCount = video.getStatistics().getViewCount();
+//        BigInteger likeCount = video.getStatistics().getLikeCount();
+//
+//        return new VideoAnalyzeDto(id, title, viewCount, likeCount);
+//    }
+
+//    private VideoDto mapToVideoDto(Video video) {
+//        return new VideoDto(
+//                video.getId(),
+//                video.getSnippet().getTitle(),
+//                video.getSnippet().getThumbnails().getDefault().getUrl(),
+//                video.getStatistics().getViewCount(),
+//                video.getSnippet().getPublishedAt(),
+//                video.getContentDetails().getDuration()
+//        );
+//    }
+//
+//    private VideoSearchDto mapToVideoSearchDto(SearchResult searchResult) {
+//        return new VideoSearchDto(
+//                searchResult.getId().getVideoId(),
+//                searchResult.getSnippet().getTitle(),
+//                searchResult.getSnippet().getThumbnails().getDefault().getUrl()
+//        );
+//    }
 }
 
