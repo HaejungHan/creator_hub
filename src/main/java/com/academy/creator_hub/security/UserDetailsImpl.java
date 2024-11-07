@@ -1,7 +1,7 @@
 package com.academy.creator_hub.security;
 
-import com.academy.creator_hub.entity.User;
-import com.academy.creator_hub.entity.UserRoleEnum;
+import com.academy.creator_hub.model.User;
+import com.academy.creator_hub.model.UserRoleEnum;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

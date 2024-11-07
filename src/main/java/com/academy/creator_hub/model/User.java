@@ -1,4 +1,4 @@
-package com.academy.creator_hub.entity;
+package com.academy.creator_hub.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +22,7 @@ public class User extends Timestamped {
     private UserRoleEnum role;
     private UserStatus userStatus;
     private String refreshToken;
-    private List<Interest> Interests;
+    private List<String> Interests;
 
     public void updateRefresh(String refreshToken) {
         this.refreshToken = refreshToken;
@@ -37,7 +37,7 @@ public class User extends Timestamped {
 
     public User (
             String username, String password, String name,UserRoleEnum role, UserStatus userStatus,
-            String refreshToken, List<Interest> interests) {
+            String refreshToken, List<String> interests) {
         this.username = username;
         this.password = password;
         this.name = name;

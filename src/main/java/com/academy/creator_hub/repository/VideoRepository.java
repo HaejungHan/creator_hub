@@ -1,6 +1,6 @@
 package com.academy.creator_hub.repository;
 
-import com.academy.creator_hub.entity.Videos;
+import com.academy.creator_hub.model.Videos;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 

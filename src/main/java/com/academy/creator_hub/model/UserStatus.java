@@ -1,4 +1,4 @@
-package com.academy.creator_hub.entity;
+package com.academy.creator_hub.model;
 
 public enum UserStatus {
     NORMAL(Authority.NORMAL),  // 정상 유저

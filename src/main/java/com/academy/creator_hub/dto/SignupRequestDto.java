@@ -1,6 +1,6 @@
 package com.academy.creator_hub.dto;
 
-import com.academy.creator_hub.entity.Interest;
+import com.academy.creator_hub.model.Interest;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,5 +28,5 @@ public class SignupRequestDto {
     private String name;
 
     @NotNull(message = "관심사는 필수 선택 사항입니다.")
-    private List<Interest> interests;
+    private List<String> interests;
 }

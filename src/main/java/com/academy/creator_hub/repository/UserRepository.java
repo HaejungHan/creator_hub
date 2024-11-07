@@ -1,6 +1,6 @@
 package com.academy.creator_hub.repository;
 
-import com.academy.creator_hub.entity.User;
+import com.academy.creator_hub.model.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

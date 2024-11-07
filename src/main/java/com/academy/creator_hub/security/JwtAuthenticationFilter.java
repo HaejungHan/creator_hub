@@ -2,7 +2,7 @@ package com.academy.creator_hub.security;
 
 import com.academy.creator_hub.dto.LoginRequestDto;
 import com.academy.creator_hub.dto.TokenResponseDto;
-import com.academy.creator_hub.entity.UserRoleEnum;
+import com.academy.creator_hub.model.UserRoleEnum;
 import com.academy.creator_hub.jwt.JwtUtil;
 import com.academy.creator_hub.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;

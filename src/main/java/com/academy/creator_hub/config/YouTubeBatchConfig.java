@@ -1,9 +1,8 @@
 package com.academy.creator_hub.config;
 
-import com.academy.creator_hub.entity.Videos;
+import com.academy.creator_hub.model.Videos;
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.Video;
-import com.google.api.services.youtube.model.VideoListResponse;
+import com.google.api.services.youtube.model.*;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -13,7 +12,6 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +29,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 @Configuration
 @EnableBatchProcessing
@@ -86,7 +85,7 @@ public class YouTubeBatchConfig {
         String nextPageToken = null;
 
         try {
-            do { // 먼저 실행
+            do {
                 YouTube.Videos.List request = youTube.videos()
                         .list(Collections.singletonList("snippet,contentDetails,statistics"))
                         .setChart("mostPopular")
@@ -121,31 +120,40 @@ public class YouTubeBatchConfig {
     }
 
     @Bean
-    public ItemProcessor<Video, Videos> youtubeProcessor() {
+    public Function<Video, Videos> youtubeProcessor() {
         return video -> {
             if (video == null) {
-                return null; // null인 경우 null 반환
+                throw new NullPointerException("동영상이 Null 입니다.");
             }
 
-            com.google.api.client.util.DateTime publishedAtDateTime = video.getSnippet().getPublishedAt();
-            LocalDateTime publishedAt = null;
+            VideoSnippet snippet = video.getSnippet();
+            VideoStatistics statistics = video.getStatistics();
+            VideoContentDetails contentDetails = video.getContentDetails();
 
-            if (publishedAtDateTime != null) {
-                long publishedAtMillis = publishedAtDateTime.getValue(); // long 타입으로 가져오기
+            LocalDateTime publishedAt = null;
+            if (snippet.getPublishedAt() != null) {
+                long publishedAtMillis = snippet.getPublishedAt().getValue();
                 publishedAt = Instant.ofEpochMilli(publishedAtMillis)
                         .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime(); // LocalDateTime으로 변환
+                        .toLocalDateTime();
             }
 
+            List<String> tags = snippet.getTags() != null ? snippet.getTags() : new ArrayList<>();
 
             return new Videos(
                     video.getId(),
-                    video.getSnippet().getTitle(),
-                    video.getSnippet().getThumbnails().getDefault().getUrl(),
-                    video.getStatistics().getViewCount(),
-                    publishedAt, // 변환된 LocalDateTime 사용
-                    video.getContentDetails().getDuration(),
-                    "https://www.youtube.com/watch?v=" + video.getId()
+                    snippet.getTitle(),
+                    snippet.getDescription(),
+                    snippet.getThumbnails().getDefault().getUrl(),
+                    statistics.getViewCount(),
+                    statistics.getLikeCount(),
+                    statistics.getCommentCount(),
+                    publishedAt,
+                    snippet.getChannelId(),
+                    snippet.getChannelTitle(),
+                    snippet.getCategoryId(),
+                    contentDetails.getDuration(),
+                    tags // 태그 추가
             );
         };
     }
@@ -156,7 +164,6 @@ public class YouTubeBatchConfig {
             List<Videos> newVideos = new ArrayList<>();
             for (Videos video : items) {
                 if (video != null) {
-                    // 비디오가 이미 존재하는지 확인
                     if (mongoTemplate.findById(video.getVideoId(), Videos.class, "videos") == null) {
                         newVideos.add(video);
                     } else {
@@ -165,13 +172,13 @@ public class YouTubeBatchConfig {
                 }
             }
             if (!newVideos.isEmpty()) {
-                mongoTemplate.insertAll(newVideos); // 한꺼번에 저장
+                mongoTemplate.insertAll(newVideos);
                 System.out.println("------mongoDB 저장완료-----");
             }
         };
     }
 
-    @Scheduled(fixedRate = 120000) // 3분마다 실행
+    @Scheduled(fixedRate = 10800000)
     public void scheduleYoutubeJob() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()

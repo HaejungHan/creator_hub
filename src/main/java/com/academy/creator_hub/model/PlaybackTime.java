@@ -1,4 +1,4 @@
-package com.academy.creator_hub.entity;
+package com.academy.creator_hub.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

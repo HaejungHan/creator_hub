@@ -1,4 +1,4 @@
-package com.academy.creator_hub.entity;
+package com.academy.creator_hub.model;
 
 public enum Interest {
     SPORTS("Sports"),

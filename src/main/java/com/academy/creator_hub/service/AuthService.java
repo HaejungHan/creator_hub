@@ -1,8 +1,8 @@
 package com.academy.creator_hub.service;
 import com.academy.creator_hub.dto.SignupRequestDto;
-import com.academy.creator_hub.entity.User;
-import com.academy.creator_hub.entity.UserRoleEnum;
-import com.academy.creator_hub.entity.UserStatus;
+import com.academy.creator_hub.model.User;
+import com.academy.creator_hub.model.UserRoleEnum;
+import com.academy.creator_hub.model.UserStatus;
 import com.academy.creator_hub.jwt.JwtUtil;
 import com.academy.creator_hub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

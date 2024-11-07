@@ -1,4 +1,4 @@
-package com.academy.creator_hub.entity;
+package com.academy.creator_hub.model;
 
 public enum UserRoleEnum {
     MANAGER(Authority.MANAGER),  // 매니저 사용자

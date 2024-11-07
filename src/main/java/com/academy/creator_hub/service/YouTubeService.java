@@ -1,24 +1,20 @@
 package com.academy.creator_hub.service;
 
-import com.academy.creator_hub.dto.PlaybackTimeRequest;
 import com.academy.creator_hub.dto.VideoAnalyzeDto;
 import com.academy.creator_hub.dto.VideoDto;
-import com.academy.creator_hub.dto.VideoSearchDto;
-import com.academy.creator_hub.entity.PlaybackTime;
+import com.academy.creator_hub.model.User;
 import com.academy.creator_hub.repository.PlaybackTimeRepository;
-import com.academy.creator_hub.repository.VideoRepository;
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
-import com.google.api.services.youtube.model.Video;
-import com.google.api.services.youtube.model.VideoListResponse;
+import com.google.api.services.youtube.model.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -72,23 +68,23 @@ public class YouTubeService {
         return videoDtos;
     }
 
-    public String savePlaybackTime(String username, PlaybackTimeRequest request) {
-        // 사용자 인증이 안 된 경우 처리
-        if (username == null) {
-            return "User not authenticated";
-        }
-
-        // PlaybackTime 객체 생성
-        PlaybackTime playbackTime = new PlaybackTime();
-        playbackTime.setVideoId(request.getVideoId());      // 클라이언트에서 보낸 비디오 ID
-        playbackTime.setPlaybackTime(request.getPlaybackTime()); // 클라이언트에서 보낸 재생 시간
-        playbackTime.setUserId(username);  // 인증된 사용자의 정보
-
-        // MongoDB에 저장
-        playbackTimeRepository.save(playbackTime);
-
-        return "Playback time saved successfully!";
-    }
+//    public String savePlaybackTime(String username, PlaybackTimeRequest request) {
+//        // 사용자 인증이 안 된 경우 처리
+//        if (username == null) {
+//            return "User not authenticated";
+//        }
+//
+//        // PlaybackTime 객체 생성
+//        PlaybackTime playbackTime = new PlaybackTime();
+//        playbackTime.setVideoId(request.getVideoId());      // 클라이언트에서 보낸 비디오 ID
+//        playbackTime.setPlaybackTime(request.getPlaybackTime()); // 클라이언트에서 보낸 재생 시간
+//        playbackTime.setUserId(username);  // 인증된 사용자의 정보
+//
+//        // MongoDB에 저장
+//        playbackTimeRepository.save(playbackTime);
+//
+//        return "Playback time saved successfully!";
+//    }
 
     private VideoDto getVideoDetails(String videoId) throws IOException {
         YouTube.Videos.List request = youtube.videos()
@@ -116,25 +112,36 @@ public class YouTubeService {
     }
 
     private VideoDto mapToVideoDto(Video video) {
+        VideoSnippet snippet = video.getSnippet();
+        VideoStatistics statistics = video.getStatistics();
+        VideoContentDetails contentDetails = video.getContentDetails();
+
+        LocalDateTime publishedAt = null;
+        if (snippet.getPublishedAt() != null) {
+            long publishedAtMillis = snippet.getPublishedAt().getValue();
+            publishedAt = Instant.ofEpochMilli(publishedAtMillis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+        }
+
         return new VideoDto(
                 video.getId(),
-                video.getSnippet().getTitle(),
-                video.getSnippet().getThumbnails().getDefault().getUrl(),
-                video.getStatistics().getViewCount(),
-                video.getSnippet().getPublishedAt(),
-                video.getContentDetails().getDuration()
+                snippet.getTitle(),
+                snippet.getDescription(),
+                snippet.getThumbnails().getDefault().getUrl(),
+                statistics.getViewCount(),
+                statistics.getLikeCount(),
+                statistics.getCommentCount(),
+                publishedAt,
+                snippet.getChannelId(),
+                snippet.getChannelTitle(),
+                snippet.getCategoryId(),
+                contentDetails.getDuration()
         );
     }
 
-    private VideoSearchDto mapToVideoSearchDto(SearchResult searchResult) {
-        return new VideoSearchDto(
-                searchResult.getId().getVideoId(),
-                searchResult.getSnippet().getTitle(),
-                searchResult.getSnippet().getThumbnails().getDefault().getUrl()
-        );
-    }
+    public Video getVideoId(String id, User user) throws IOException {
 
-    public Video getVideoId(String id) throws IOException {
         YouTube.Videos.List request = youtube.videos()
                 .list(Collections.singletonList("snippet,contentDetails,statistics"))
                 .setId(Collections.singletonList(id))
@@ -147,33 +154,5 @@ public class YouTubeService {
         return response.getItems().get(0);
     }
 
-
-//    private VideoAnalyzeDto mapToVideoAnalyzeDto(Video video) {
-//        String id = video.getId();
-//        String title = video.getSnippet().getTitle();
-//        BigInteger viewCount = video.getStatistics().getViewCount();
-//        BigInteger likeCount = video.getStatistics().getLikeCount();
-//
-//        return new VideoAnalyzeDto(id, title, viewCount, likeCount);
-//    }
-
-//    private VideoDto mapToVideoDto(Video video) {
-//        return new VideoDto(
-//                video.getId(),
-//                video.getSnippet().getTitle(),
-//                video.getSnippet().getThumbnails().getDefault().getUrl(),
-//                video.getStatistics().getViewCount(),
-//                video.getSnippet().getPublishedAt(),
-//                video.getContentDetails().getDuration()
-//        );
-//    }
-//
-//    private VideoSearchDto mapToVideoSearchDto(SearchResult searchResult) {
-//        return new VideoSearchDto(
-//                searchResult.getId().getVideoId(),
-//                searchResult.getSnippet().getTitle(),
-//                searchResult.getSnippet().getThumbnails().getDefault().getUrl()
-//        );
-//    }
 }
 
