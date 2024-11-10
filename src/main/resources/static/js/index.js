@@ -28,139 +28,26 @@ $(document).ready(function () {
         }
     }
 
-    // 플레이어 준비 완료 후 실행
-    function onPlayerReady(event) {
-        console.log("Player ready!");
-        videoId = event.target.getVideoData().video_id;  // 현재 비디오 ID를 가져옵니다.
-        // 이곳에서 타이머를 바로 시작하는 대신, 'onStateChange'에서 타이머 시작
-    }
-
-    // 플레이어 상태 변화 시
-    function onPlayerStateChange(event) {
-        // 비디오 재생 시작
-        if (event.data === YT.PlayerState.PLAYING) {
-            console.log("Video is playing");
-            startVideoTimer(videoId);  // 타이머 시작
-        }
-
-        // 비디오가 멈췄을 때 (일시 정지)
-        else if (event.data === YT.PlayerState.PAUSED) {
-            console.log("Video is paused");
-            sendPlaybackTimeToServer(videoId, getCurrentPlaybackTime());  // 서버로 시간 전송
-            stopVideoTimer();  // 타이머 멈추기
-        }
-
-        // 비디오가 끝났을 때
-        else if (event.data === YT.PlayerState.ENDED) {
-            console.log("Video has ended");
-            sendPlaybackTimeToServer(videoId, getCurrentPlaybackTime());  // 서버로 시간 전송
-            stopVideoTimer();  // 타이머 멈추기
-        }
-    }
-
-
-    function startVideoTimer(videoId) {
-        videoStartTime = Date.now();  // 비디오 시작 시간 기록
-
-        videoTimer = setInterval(function () {
-            const currentTime = getCurrentPlaybackTime();
-            console.log(`Video playback time: ${currentTime} seconds`);
-
-            // 서버에 재생 시간 전송
-            sendPlaybackTimeToServer(videoId, currentTime);
-        }, 1000); // 1초마다 실행
-    }
-
-// 현재까지의 재생 시간 계산
-    function getCurrentPlaybackTime() {
-        return Math.floor((Date.now() - videoStartTime) / 1000);  // 초 단위로 계산
-    }
-
-// 타이머 멈추기
-    function stopVideoTimer() {
-        if (videoTimer) {
-            clearInterval(videoTimer);  // 타이머 멈추기
-            videoTimer = null;  // 타이머 리셋
-        }
-    }
-
-// 서버에 재생 시간 전송
-    function sendPlaybackTimeToServer(videoId, currentTime) {
-        const token = Cookies.get('Authorization');  // 'Bearer <jwt_token>' 형태
-
-        if (!token) {
-            console.error('No JWT token found.');
-            return;
-        }
-
-        // 'Bearer ' 부분을 제외한 실제 JWT 토큰만 추출
-        const jwtToken = token.split(' ')[1];
-
-        $.ajax({
-            url: '/api/save-playback-time',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                videoId: videoId,
-                playbackTime: currentTime
-            }),
-            headers: {
-                'Authorization': `Bearer ${jwtToken}`  // Authorization 헤더에 JWT 토큰 포함
-            },
-            success: function(response) {
-                console.log('Playback time saved successfully');
-            },
-            error: function(err) {
-                console.error('Error saving playback time:', err);
-            }
-        });
-    }
-
     // 동영상 모달 로드
-    function loadVideoModal(id) {
-        $.ajax({
-            url: `/api/video/${id}`, // 백엔드에서 비디오 데이터 가져오기
-            method: 'GET',
-            success: function (video) {
-                // 비디오 정보 업데이트
-                $('#modalVideoTitle').text(video.title);
-                $('#modalVideoViews').text(`${video.viewCount} views`);
-                $('#modalVideoDate').text(formatPublishedDate(video.publishedAt));
+    async function loadVideoModal(id) {
+        try {
+            const response = await fetch(`/api/video/${id}`); // fetch를 사용하여 백엔드에서 비디오 데이터 가져오기
+            const video = await response.json(); // 응답을 JSON으로 파싱
 
-                // iframe src에 유튜브 Embed URL 설정
-                const youtubeEmbedUrl = `https://www.youtube.com/embed/${id}`;
-                $('#videoPlayer').attr('src', youtubeEmbedUrl);
+            // 비디오 정보 업데이트
+            $('#modalVideoTitle').text(video.title);
+            $('#modalVideoViews').text(`${video.viewCount} views`);
+            $('#modalVideoDate').text(formatPublishedDate(video.publishedAt));
 
-                // 모달 열기
-                showModal($('#videoModal'));
+            // iframe src에 유튜브 Embed URL 설정
+            const youtubeEmbedUrl = `https://www.youtube.com/embed/${id}`;
+            $('#videoPlayer').attr('src', youtubeEmbedUrl);
 
-                $('#playButton').on('click', function () {
-                    if (!player) {
-                        // 플레이어 객체가 없으면 새로 생성
-                        player = new YT.Player('videoPlayer', {
-                            events: {
-                                'onReady': function (event) {
-                                    player.playVideo();
-                                    startVideoTimer(id); // 타이머 시작
-                                },
-                                'onStateChange': function (event) {
-                                    onPlayerStateChange(event); // 플레이어 상태 변경 처리
-                                }
-                            }
-                        });
-                    } else {
-                        // 기존 플레이어가 있으면 바로 재생
-                        player.playVideo();
-                        startVideoTimer(id); // 타이머 시작
-                    }
-
-                    $(this).hide(); // 플레이 버튼 숨기기
-                });
-            },
-            error: function (err) {
-                console.error('Error loading video modal:', err);
-            }
-        });
+            // 모달 열기
+            showModal($('#videoModal'));
+        } catch (err) {
+            console.error('Error loading video modal:', err);
+        }
     }
 
     // 모달 닫기 시 타이머와 비디오 종료
@@ -213,8 +100,8 @@ $(document).ready(function () {
         }
     });
 
-// 로그인 폼 제출
-    $('#loginForm').submit(function (e) {
+    // 로그인 폼 제출
+    $('#loginForm').submit(async function (e) {
         e.preventDefault();  // 기본 폼 제출을 막고, AJAX 요청을 처리하도록 합니다.
 
         const email = $('#loginEmail').val().trim();
@@ -231,52 +118,55 @@ $(document).ready(function () {
             password: password
         };
 
+        try {
+            const response = await fetch('/login', {  // fetch로 로그인 요청
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
 
-        $.ajax({
-            type: 'POST',
-            url: '/login',  // 로그인 API URL
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function (response, textStatus, xhr) {
-
-                // Authorization 헤더에서 토큰을 추출
-                var accessToken = xhr.getResponseHeader("Authorization");
-                var refreshToken = xhr.getResponseHeader("RefreshToken");
+            if (response.ok) {
+                const accessToken = response.headers.get('Authorization');
+                const refreshToken = response.headers.get('RefreshToken');
 
                 // Authorization 토큰을 쿠키에 저장
                 if (accessToken) {
-                    accessToken = accessToken.split(' ')[1]; // Bearer 접두어 제거
-                    Cookies.set('Authorization', accessToken, {
+                    Cookies.set('Authorization', accessToken.split(' ')[1], {
                         path: '/',
-                        sameSite: 'Lax',  // Lax로 설정 (로컬 환경에서 동작)
-                        secure: false     // HTTP 환경에서는 secure를 false로 설정
+                        sameSite: 'Lax',
+                        secure: false
                     });
                 }
 
                 // RefreshToken을 쿠키에 저장
                 if (refreshToken) {
-                    refreshToken = refreshToken.split(' ')[1]; // Bearer 접두어 제거
-                    Cookies.set('RefreshToken', refreshToken, {
+                    Cookies.set('RefreshToken', refreshToken.split(' ')[1], {
                         path: '/',
-                        sameSite: 'Lax',  // Lax로 설정
-                        secure: false     // HTTP 환경에서는 secure를 false로 설정
+                        sameSite: 'Lax',
+                        secure: false
                     });
                 }
+
                 alert('로그인이 완료되었습니다.');
                 window.location.href = '/main';
                 setTimeout(function () {
-                    $('#loginBtn').html('<i class="fas fa-sign-out-alt"></i><span>로그아웃</span>');  // 버튼 텍스트를 "로그아웃"으로 변경
-                    $('#loginBtn').attr('id', 'logoutBtn');  // 버튼 ID를 "logoutBtn"으로 변경
-                }, 100); // DOM이 렌더링된 후에 버튼 텍스트 및 ID를 변경
-
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.error('Login failed', errorThrown);
+                    $('#loginBtn').html('<i class="fas fa-sign-out-alt"></i><span>로그아웃</span>');
+                    $('#loginBtn').attr('id', 'logoutBtn');
+                }, 100);
+            } else {
+                const error = await response.json();
                 $('#error-message').text('Invalid email or password. Please try again.');
                 $('#error-message').show();
                 alert('로그인 실패');
             }
-        });
+        } catch (err) {
+            console.error('Login failed', err);
+            $('#error-message').text('로그인 중 오류가 발생했습니다.');
+            $('#error-message').show();
+            alert('로그인 실패');
+        }
     });
 
     // 로그아웃 처리
@@ -339,17 +229,16 @@ $(document).ready(function () {
     }
 
     // 인기 동영상 불러오기
-    function loadPopularVideos() {
-        $.ajax({
-            url: '/api/popular', // API endpoint
-            method: 'GET',
-            success: function (videos) {
-                popularVideosGrid.empty(); // 기존 내용 비우기
+    async function loadPopularVideos() {
+        try {
+            const response = await fetch('/api/popular');  // fetch로 인기 동영상 데이터를 가져오기
+            const videos = await response.json(); // 응답을 JSON으로 파싱
+            popularVideosGrid.empty(); // 기존 내용 비우기
 
-                videos.forEach(video => {
-                    const readableDuration = parseDuration(video.duration); // 변환된 지속 시간
-                    const readablePublishedDate = formatPublishedDate(video.publishedAt); // 변환된 게시 날짜
-                    const videoCard = `
+            videos.forEach(video => {
+                const readableDuration = parseDuration(video.duration);
+                const readablePublishedDate = formatPublishedDate(video.publishedAt);
+                const videoCard = `
                     <div class="video-card" data-id="${video.videoId}">
                         <div class="thumbnail">
                             <img src="${video.thumbnailUrl.replace('default.jpg', 'hqdefault.jpg')}" alt="${video.title}">
@@ -369,30 +258,26 @@ $(document).ready(function () {
                             </div>
                         </div>
                     </div>`;
-                    popularVideosGrid.append(videoCard);
-                });
-            },
-            error: function (err) {
-                console.error('Error loading popular videos:', err);
-            }
-        });
+                popularVideosGrid.append(videoCard);
+            });
+        } catch (err) {
+            console.error('Error loading popular videos:', err);
+        }
     }
 
     // 검색 기능
-    function performSearch() {
+    async function performSearch() {
         const query = searchInput.val().trim();
         if (query) {
-            $.ajax({
-                url: '/api/search', // API endpoint
-                method: 'GET',
-                data: { query: query },
-                success: function (videos) {
-                    searchResultsGrid.empty(); // 기존 내용 비우기
+            try {
+                const response = await fetch(`/api/search?query=${query}`);  // fetch로 검색 요청
+                const videos = await response.json(); // 응답을 JSON으로 파싱
+                searchResultsGrid.empty(); // 기존 내용 비우기
 
-                    videos.forEach(video => {
-                        const readableDuration = parseDuration(video.duration); // 변환된 지속 시간
-                        const readablePublishedDate = formatPublishedDate(video.publishedAt); // 변환된 게시 날짜
-                        const videoCard = `
+                videos.forEach(video => {
+                    const readableDuration = parseDuration(video.duration);
+                    const readablePublishedDate = formatPublishedDate(video.publishedAt);
+                    const videoCard = `
                         <div class="video-card" data-id="${video.videoId}">
                             <div class="thumbnail">
                                 <img src="${video.thumbnailUrl.replace('default.jpg', 'hqdefault.jpg')}" alt="${video.title}">
@@ -412,13 +297,11 @@ $(document).ready(function () {
                                 </div>
                             </div>
                         </div>`;
-                        searchResultsGrid.append(videoCard);
-                    });
-                },
-                error: function (err) {
-                    console.error('Error searching videos:', err);
-                }
-            });
+                    searchResultsGrid.append(videoCard);
+                });
+            } catch (err) {
+                console.error('Error searching videos:', err);
+            }
         }
     }
 
@@ -433,12 +316,6 @@ $(document).ready(function () {
         if (e.key === 'Enter') performSearch();
     });
 
-    // 메뉴 항목 클릭 시 활성화 효과
-    $('.menu-item').on('click', function () {
-        $('.menu-item').removeClass('active');
-        $(this).addClass('active');
-    });
-
     // 동영상 카드 클릭 시 모달 열기
     $(document).on('click', '.video-card', function () {
         const videoId = $(this).data('id'); // 클릭된 카드의 video id
@@ -446,5 +323,6 @@ $(document).ready(function () {
         loadVideoModal(videoId); // 해당 videoId로 모달을 채워넣음
     });
 
+    // 인기 동영상 로드
     loadPopularVideos();
 });

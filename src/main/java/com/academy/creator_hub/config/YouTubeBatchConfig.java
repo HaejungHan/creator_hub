@@ -123,7 +123,9 @@ public class YouTubeBatchConfig {
     public Function<Video, Videos> youtubeProcessor() {
         return video -> {
             if (video == null) {
-                throw new NullPointerException("동영상이 Null 입니다.");
+                // null일 경우 로그를 찍고 넘어가도록 처리
+                System.out.println("동영상이 Null 입니다.");
+                return null;  // Null 값을 반환해서, 이후 처리에서 무시하도록 할 수 있습니다.
             }
 
             VideoSnippet snippet = video.getSnippet();
@@ -164,16 +166,25 @@ public class YouTubeBatchConfig {
             List<Videos> newVideos = new ArrayList<>();
             for (Videos video : items) {
                 if (video != null) {
-                    if (mongoTemplate.findById(video.getVideoId(), Videos.class, "videos") == null) {
-                        newVideos.add(video);
-                    } else {
-                        System.out.println("------이미 존재하는 비디오: " + video.getVideoId() + "-----");
+                    try {
+                        if (mongoTemplate.findById(video.getVideoId(), Videos.class, "videos") == null) {
+                            newVideos.add(video);
+                        } else {
+                            System.out.println("------이미 존재하는 비디오: " + video.getVideoId() + "-----");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("MongoDB 처리 중 오류 발생: " + e.getMessage());
                     }
                 }
             }
+
             if (!newVideos.isEmpty()) {
-                mongoTemplate.insertAll(newVideos);
-                System.out.println("------mongoDB 저장완료-----");
+                try {
+                    mongoTemplate.insertAll(newVideos);
+                    System.out.println("------mongoDB 저장완료-----");
+                } catch (Exception e) {
+                    System.out.println("MongoDB 저장 중 오류 발생: " + e.getMessage());
+                }
             }
         };
     }

@@ -3,7 +3,10 @@ package com.academy.creator_hub.dto;
 import lombok.Getter;
 
 @Getter
-public class PlaybackTimeRequest {
+public class VideoPlaybackRequest {
+
     private String videoId;
-    private long playbackTime;
+    private int rating;
+
+    // Getters and Setters
 }

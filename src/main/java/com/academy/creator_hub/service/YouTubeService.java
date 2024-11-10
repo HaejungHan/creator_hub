@@ -1,9 +1,8 @@
 package com.academy.creator_hub.service;
 
-import com.academy.creator_hub.dto.VideoAnalyzeDto;
 import com.academy.creator_hub.dto.VideoDto;
 import com.academy.creator_hub.model.User;
-import com.academy.creator_hub.repository.PlaybackTimeRepository;
+import com.academy.creator_hub.repository.RecommendationRepository;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class YouTubeService {
-    private final PlaybackTimeRepository playbackTimeRepository;
+    private final RecommendationRepository recommendationRepository;
     private final YouTube youtube;
 
     @Value("${youtube.api.key}")
@@ -68,23 +66,19 @@ public class YouTubeService {
         return videoDtos;
     }
 
-//    public String savePlaybackTime(String username, PlaybackTimeRequest request) {
-//        // 사용자 인증이 안 된 경우 처리
-//        if (username == null) {
-//            return "User not authenticated";
-//        }
-//
-//        // PlaybackTime 객체 생성
-//        PlaybackTime playbackTime = new PlaybackTime();
-//        playbackTime.setVideoId(request.getVideoId());      // 클라이언트에서 보낸 비디오 ID
-//        playbackTime.setPlaybackTime(request.getPlaybackTime()); // 클라이언트에서 보낸 재생 시간
-//        playbackTime.setUserId(username);  // 인증된 사용자의 정보
-//
-//        // MongoDB에 저장
-//        playbackTimeRepository.save(playbackTime);
-//
-//        return "Playback time saved successfully!";
-//    }
+    public Video getVideoId(String id, User user) throws IOException {
+
+        YouTube.Videos.List request = youtube.videos()
+                .list(Collections.singletonList("snippet,contentDetails,statistics"))
+                .setId(Collections.singletonList(id))
+                .setKey(API_KEY);
+
+        VideoListResponse response = request.execute();
+        if (response.getItems().isEmpty()) {
+            return null;
+        }
+        return response.getItems().get(0);
+    }
 
     private VideoDto getVideoDetails(String videoId) throws IOException {
         YouTube.Videos.List request = youtube.videos()
@@ -100,15 +94,6 @@ public class YouTubeService {
         }
 
         return null;
-    }
-
-    private VideoAnalyzeDto mapToVideoAnalyzeDto(Video video) {
-        String id = video.getId();
-        String title = video.getSnippet().getTitle();
-        BigInteger viewCount = video.getStatistics().getViewCount();
-        BigInteger likeCount = video.getStatistics().getLikeCount();
-
-        return new VideoAnalyzeDto(id, title, viewCount, likeCount);
     }
 
     private VideoDto mapToVideoDto(Video video) {
@@ -140,19 +125,6 @@ public class YouTubeService {
         );
     }
 
-    public Video getVideoId(String id, User user) throws IOException {
-
-        YouTube.Videos.List request = youtube.videos()
-                .list(Collections.singletonList("snippet,contentDetails,statistics"))
-                .setId(Collections.singletonList(id))
-                .setKey(API_KEY);
-
-        VideoListResponse response = request.execute();
-        if (response.getItems().isEmpty()) {
-            return null;
-        }
-        return response.getItems().get(0);
-    }
 
 }
 

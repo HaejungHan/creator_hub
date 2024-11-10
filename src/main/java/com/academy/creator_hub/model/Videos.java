@@ -3,6 +3,7 @@ package com.academy.creator_hub.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigInteger;
@@ -14,6 +15,9 @@ import java.util.List;
 @NoArgsConstructor
 public class Videos {
     @Id
+    private String id;
+
+    @Indexed(unique = true)
     private String videoId;
     private String title;
     private String description;
