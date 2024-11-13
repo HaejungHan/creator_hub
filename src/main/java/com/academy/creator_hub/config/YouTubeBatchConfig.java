@@ -1,6 +1,7 @@
 package com.academy.creator_hub.config;
 
 import com.academy.creator_hub.model.Videos;
+import com.academy.creator_hub.repository.VideoRepository;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import org.springframework.batch.core.Job;
@@ -29,6 +30,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Configuration
@@ -39,7 +41,7 @@ public class YouTubeBatchConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final YouTube youTube;
-    private final MongoTemplate mongoTemplate;
+    private final VideoRepository videoRepository;
     private final JobLauncher jobLauncher;
 
     @Value("${youtube.api.key}")
@@ -47,11 +49,11 @@ public class YouTubeBatchConfig {
 
     @Autowired
     public YouTubeBatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
-                              YouTube youtube, MongoTemplate mongoTemplate, JobLauncher jobLauncher) {
+                              YouTube youtube, VideoRepository videoRepository, JobLauncher jobLauncher) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.youTube = youtube;
-        this.mongoTemplate = mongoTemplate;
+        this.videoRepository = videoRepository;
         this.jobLauncher = jobLauncher;
     }
 
@@ -167,7 +169,8 @@ public class YouTubeBatchConfig {
             for (Videos video : items) {
                 if (video != null) {
                     try {
-                        if (mongoTemplate.findById(video.getVideoId(), Videos.class, "videos") == null) {
+                        Optional<Videos> existingVideo = videoRepository.findByVideoId(video.getVideoId());
+                        if (!existingVideo.isPresent()) {
                             newVideos.add(video);
                         } else {
                             System.out.println("------이미 존재하는 비디오: " + video.getVideoId() + "-----");
@@ -178,9 +181,10 @@ public class YouTubeBatchConfig {
                 }
             }
 
+            // 새 비디오가 있으면 저장
             if (!newVideos.isEmpty()) {
                 try {
-                    mongoTemplate.insertAll(newVideos);
+                    videoRepository.saveAll(newVideos); // MongoRepository의 saveAll을 사용하여 비디오 저장
                     System.out.println("------mongoDB 저장완료-----");
                 } catch (Exception e) {
                     System.out.println("MongoDB 저장 중 오류 발생: " + e.getMessage());

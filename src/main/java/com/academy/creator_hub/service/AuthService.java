@@ -40,6 +40,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
+
     public void logout(User user) {
         User finduser = findByUsername(user.getUsername());
         checkUserStatus(finduser);

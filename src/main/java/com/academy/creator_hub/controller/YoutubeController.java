@@ -1,17 +1,19 @@
 package com.academy.creator_hub.controller;
 
 
+import com.academy.creator_hub.dto.ChannelResponseDto;
 import com.academy.creator_hub.dto.VideoDto;
-import com.academy.creator_hub.dto.VideoPlaybackRequest;
-import com.academy.creator_hub.model.UserVideoInteraction;
 import com.academy.creator_hub.model.VideoRecommendation;
 import com.academy.creator_hub.repository.RecommendationRepository;
-import com.academy.creator_hub.repository.UserVideoInteractionRepository;
 import com.academy.creator_hub.security.UserDetailsImpl;
-import com.academy.creator_hub.service.SparkALSModelService;
+import com.academy.creator_hub.service.KeywordAnalysisService;
+import com.academy.creator_hub.service.SparkRecommendationService;
 import com.academy.creator_hub.service.YouTubeService;
+import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.Video;
 import lombok.RequiredArgsConstructor;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +27,9 @@ import java.util.Optional;
 public class YoutubeController {
 
     private final YouTubeService youTubeService;
-    private final SparkALSModelService sparkALSModelService;
+    private final SparkRecommendationService sparkRecommendationService;
+    private final KeywordAnalysisService keywordAnalysisService;
     private final RecommendationRepository  recommendationRepository;
-    private final UserVideoInteractionRepository userVideoInteractionRepository;
 
     @GetMapping("/search")
     public List<VideoDto> searchVideos(@RequestParam String query) throws IOException {
@@ -46,16 +48,39 @@ public class YoutubeController {
 
     @GetMapping("/recommendations")
     public VideoRecommendation getRecommendations(@AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        // 특정 사용자에 대한 추천 결과 조회
         Optional<VideoRecommendation> recommendation = recommendationRepository.findByUsername(userDetails.getUsername());
-        return recommendation.orElse(null);  // 추천 결과가 없으면 null 반환
+        return recommendation.orElse(null);
     }
 
-    @GetMapping("/generate")
+    @PostMapping("/generate")
     public void generateRecommendations(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-           sparkALSModelService.generateRecommendations(userDetails.getUsername());
+           sparkRecommendationService.generateRecommendations(userDetails.getUsername());
     }
 
+//    @GetMapping("/keywords/trend")
+//    public void getKeywordTrends() {
+//        keywordAnalysisService.analyzeKeywordTrendsAndSave();
+//    }
+
+    @GetMapping("/channel/{channelId}")
+    public ChannelResponseDto getChannelInfo(@PathVariable String channelId) {
+        try {
+            Channel channel = youTubeService.getChannelInfo(channelId);
+
+            return new ChannelResponseDto(
+                    channel.getSnippet().getTitle(),
+                    channel.getSnippet().getDescription(),
+                    channel.getSnippet().getCustomUrl(),
+                    channel.getSnippet().getPublishedAt().toString(),
+                    channel.getStatistics().getViewCount().toString(),
+                    channel.getStatistics().getSubscriberCount().toString(),
+                    channel.getStatistics().getVideoCount().toString(),
+                    channel.getBrandingSettings().getChannel().getKeywords()
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("채널 정보를 가져오는 데 실패했습니다.", e);
+        }
+    }
 
 }
 

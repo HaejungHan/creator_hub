@@ -7,11 +7,11 @@ $(document).ready(function () {
     const closeButtons = $('.close-modal');
     const loginForm = $('#loginForm');
     const popularVideosGrid = $('#popularVideos');
-    const videoModal = $('#videoModal'); // 모달
-    const videoPlayer = $('#videoPlayer'); // 비디오 플레이어 iframe
-    let player;  // 유튜브 플레이어 객체
-    let videoId; // 전역 videoId 변수 (onReady에서 가져온 videoId 저장)
-    let videoStartTime = 0;  // 비디오 시작 시간을 저장할 변수
+    const videoModal = $('#videoModal');
+    const videoPlayer = $('#videoPlayer');
+    let player;
+    let videoId;
+    let videoStartTime = 0;
     let videoTimer;
 
     function onYouTubeIframeAPIReady() {

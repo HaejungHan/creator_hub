@@ -17,17 +17,8 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <!-- YouTube Iframe API -->
     <script src="https://www.youtube.com/iframe_api"></script>
-
-    <!-- JavaScript 파일들 (순서 중요) -->
-    <script src="${path}/js/utils.js"></script>    <!-- 유틸리티 함수들이 포함된 파일 -->
-    <script src="${path}/js/modal.js"></script>    <!-- 모달 관련 코드 -->
-    <script src="${path}/js/player.js"></script>   <!-- YouTube 플레이어 코드 -->
-    <script src="${path}/js/main.js"></script>     <!-- 메인 로직 (이게 마지막에 로드되어야 함) -->
-    <script src="${path}/js/login.js"></script>     <!-- 로그인 관련 기능 처리 -->
-
     <!-- CSS 스타일 시트 -->
     <link rel="icon" href="${path}/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="${path}/css/index.css"/>

@@ -1,14 +1,10 @@
 package com.academy.creator_hub.dto;
 
-import com.academy.creator_hub.model.Interest;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 import java.util.List;
 
 @Getter
@@ -28,5 +24,6 @@ public class SignupRequestDto {
     private String name;
 
     @NotNull(message = "관심사는 필수 선택 사항입니다.")
+    @Size(min = 1, max = 3, message = "최소 1개이상 3개이하로 선택하세요.")
     private List<String> interests;
 }

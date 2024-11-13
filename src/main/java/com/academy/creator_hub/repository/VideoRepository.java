@@ -10,6 +10,6 @@ import java.util.Optional;
 
 public interface VideoRepository extends MongoRepository<Videos, Long> {
 
-    List<Videos> findByVideoId(String videoId);
+    Optional<Videos> findByVideoId(String videoId);
 
 }
