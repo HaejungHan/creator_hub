@@ -15,13 +15,14 @@ import lombok.RequiredArgsConstructor;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class YoutubeController {
@@ -30,6 +31,11 @@ public class YoutubeController {
     private final SparkRecommendationService sparkRecommendationService;
     private final KeywordAnalysisService keywordAnalysisService;
     private final RecommendationRepository  recommendationRepository;
+
+    @GetMapping("/")
+    public String getMainPage() {
+        return "index";
+    }
 
     @GetMapping("/search")
     public List<VideoDto> searchVideos(@RequestParam String query) throws IOException {
@@ -43,7 +49,7 @@ public class YoutubeController {
 
     @GetMapping("/video/{id}")
     public Video getVideoById(@PathVariable String id, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        return youTubeService.getVideoId(id, userDetails.getUser());
+        return youTubeService.getVideoId(id);
     }
 
     @GetMapping("/recommendations")
@@ -57,10 +63,6 @@ public class YoutubeController {
            sparkRecommendationService.generateRecommendations(userDetails.getUsername());
     }
 
-//    @GetMapping("/keywords/trend")
-//    public void getKeywordTrends() {
-//        keywordAnalysisService.analyzeKeywordTrendsAndSave();
-//    }
 
     @GetMapping("/channel/{channelId}")
     public ChannelResponseDto getChannelInfo(@PathVariable String channelId) {
@@ -82,5 +84,9 @@ public class YoutubeController {
         }
     }
 
+//    @GetMapping("/keywords/trend")
+//    public void getKeywordTrends() {
+//        keywordAnalysisService.analyzeKeywordTrendsAndSave();
+//    }
 }
 

@@ -1,9 +1,14 @@
 package com.academy.creator_hub.model;
 
+import com.academy.creator_hub.dto.VideoDto;
+import com.academy.creator_hub.dto.VideoRecommandationDto;
+import com.google.api.services.youtube.model.Video;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -13,12 +18,10 @@ public class VideoRecommendation {
     @Id
     private String id;
     private String username;
-    private String videoId;
-    private double similarity;
+    private List<VideoRecommandationDto> recommendations;
 
-    public VideoRecommendation(String username, String videoId, double similarity) {
+    public VideoRecommendation(String username, List<VideoRecommandationDto> recommendations) {
         this.username = username;
-        this.videoId = videoId;
-        this.similarity = similarity;
+        this.recommendations = recommendations;
     }
 }

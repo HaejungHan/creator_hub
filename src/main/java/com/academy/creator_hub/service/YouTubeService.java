@@ -66,7 +66,7 @@ public class YouTubeService {
         return videoDtos;
     }
 
-    public Video getVideoId(String id, User user) throws IOException {
+    public Video getVideoId(String id) throws IOException {
 
         YouTube.Videos.List request = youtube.videos()
                 .list(Collections.singletonList("snippet,contentDetails,statistics"))
@@ -78,6 +78,19 @@ public class YouTubeService {
             return null;
         }
         return response.getItems().get(0);
+    }
+
+    public Channel getChannelInfo(String channelId) throws IOException {
+        YouTube.Channels.List request = youtube.channels()
+                .list(Collections.singletonList("snippet,statistics,brandingSettings"));  // 필요한 데이터 항목
+        request.setId(Collections.singletonList(channelId));
+        request.setKey(API_KEY);   // API Key 설정
+        ChannelListResponse response = request.execute();
+        if (response.getItems().isEmpty()) {
+            throw new RuntimeException("채널 정보를 찾을 수 없습니다.");
+        }
+
+        return response.getItems().get(0);  // 첫 번째 채널 정보를 반환
     }
 
     private VideoDto getVideoDetails(String videoId) throws IOException {
@@ -125,18 +138,6 @@ public class YouTubeService {
         );
     }
 
-    public Channel getChannelInfo(String channelId) throws IOException {
-        YouTube.Channels.List request = youtube.channels()
-                .list(Collections.singletonList("snippet,statistics,brandingSettings"));  // 필요한 데이터 항목
-        request.setId(Collections.singletonList(channelId));
-        request.setKey(API_KEY);
-        ChannelListResponse response = request.execute();
-        if (response.getItems().isEmpty()) {
-            throw new RuntimeException("채널 정보를 찾을 수 없습니다.");
-        }
-
-        return response.getItems().get(0);  // 첫 번째 채널 정보를 반환
-    }
 
 
 }
