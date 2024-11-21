@@ -133,6 +133,29 @@ body {
     transform: translateY(-2px);
 }
 
+#pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;  /* 페이지네이션 위 여백 추가 */
+}
+
+.page-btn {
+    padding: 10px 15px;
+    margin: 0 5px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.page-btn:hover {
+    background-color: #ddd;
+}
+
 .modal {
     display: none;
     position: fixed;

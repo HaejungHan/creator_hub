@@ -60,7 +60,8 @@
       <div class="video-grid" id="allVideos">
         <!-- 비디오 카드 데이터는 자바스크립트로 동적으로 생성 -->
       </div>
-   </div>
+    <div id="pagination"></div>
+  </div>
   </div>
 
 <script type="text/javascript">
@@ -187,7 +188,7 @@
       const videoCard = $('<div>').addClass('video-card');
       const videoThumbnail = $('<div>').addClass('thumbnail');
       const thumbnailImg = $('<img>')
-              .attr('src', video.thumbnailUrl.replace('default', 'maxresdefault'))
+              .attr('src', video.thumbnailUrl.replace('maxresdefault', 'hqdefault'))
               .attr('alt', 'Thumbnail')
               .css({
                 'width': '100%',
@@ -250,6 +251,47 @@
       return formattedDuration.trim();
     }
 
+    let currentPage = 1;  // 현재 페이지
+    const pageSize = 10;  // 한 페이지당 비디오 수 (기본값 10)
+
+
+    function renderPagination(totalPages) {
+      const paginationContainer = $('#pagination');
+      paginationContainer.empty();
+
+
+      if (currentPage > 1) {
+        paginationContainer.append(
+                $('<button>').addClass('page-btn').text('이전').click(function() {
+                  currentPage--;
+                  performSearch();
+                })
+        );
+      }
+
+      for (let i = 1; i <= totalPages; i++) {
+        paginationContainer.append(
+                $('<button>')
+                        .addClass('page-btn')
+                        .text(i)
+                        .toggleClass('active', i === currentPage)
+                        .click(function() {
+                          currentPage = i;
+                          performSearch();
+                        })
+        );
+      }
+
+      if (currentPage < totalPages) {
+        paginationContainer.append(
+                $('<button>').addClass('page-btn').text('다음').click(function() {
+                  currentPage++;
+                  performSearch();
+                })
+        );
+      }
+    }
+
     function performSearch() {
       const searchTerm = searchInput.val().trim();
 
@@ -257,10 +299,14 @@
         $.ajax({
           url: '/searchVideos',
           type: 'GET',
-          data: { query: searchTerm },
+          data: { query: searchTerm,
+                  page: currentPage,
+                  pageSize: pageSize
+          },
           success: function (data) {
             console.log(data);
             renderVideos(data.videos);
+            renderPagination(data.totalPages);
           },
           error: function (error) {
             console.error('Error fetching search results:', error);

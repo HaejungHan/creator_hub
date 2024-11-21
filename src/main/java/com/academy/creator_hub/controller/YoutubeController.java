@@ -43,19 +43,34 @@ public class YoutubeController {
         return "home";
     }
 
-    // 동영상 검색 (비동기 처리)
     @RequestMapping(value = "/searchVideos", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Object> searchVideos(@RequestParam String query) throws IOException {
-        List<VideoDto> videos = new ArrayList<>();
+    public Map<String, Object> searchVideos(@RequestParam String query,
+                                            @RequestParam(defaultValue = "1") int page,
+                                            @RequestParam(defaultValue = "10") int pageSize) throws IOException {
+        List<VideoDto> allVideos = new ArrayList<>();
 
         if (query != null && !query.trim().isEmpty()) {
-            videos = youTubeService.searchVideos(query);
+            // 50개 비디오를 받아옴
+            allVideos = youTubeService.searchVideos(query);
         }
 
-        // 검색 결과를 JSON 형태로 반환
+        // 페이지네이션 처리
+        int startIndex = (page - 1) * pageSize;  // 시작 인덱스
+        int endIndex = Math.min(startIndex + pageSize, allVideos.size());  // 끝 인덱스
+        List<VideoDto> videosForCurrentPage = allVideos.subList(startIndex, endIndex);  // 현재 페이지에 해당하는 비디오 목록
+
+        // 페이지네이션 관련 데이터 계산
+        int totalVideos = allVideos.size();  // 전체 비디오 개수
+        int totalPages = (int) Math.ceil((double) totalVideos / pageSize);  // 전체 페이지 수
+
+        // 응답 데이터 생성
         Map<String, Object> response = new HashMap<>();
-        response.put("videos", videos);
+        response.put("videos", videosForCurrentPage);  // 현재 페이지 비디오 목록
+        response.put("total", totalVideos);  // 전체 비디오 개수
+        response.put("page", page);  // 현재 페이지 번호
+        response.put("totalPages", totalPages);  // 전체 페이지 수
+
         return response;
     }
 
