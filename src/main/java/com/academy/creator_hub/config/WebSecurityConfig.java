@@ -32,7 +32,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()  // CSRF 보호 비활성화 (필요시 활성화)
                 .authorizeRequests()
-                .antMatchers("/css/**", "/js/**", "/images/**", "/main", "/signup", "/login", "/api/popular", "/search", "/api/video/**", "/api/generate", "/api/keywords/trend", "/api/channel/**", "/**").permitAll()
+                .antMatchers("/css/**", "/js/**", "/images/**", "/main", "/signup", "/login", "/popular", "/search", "/video/**", "/generate", "/keywords/trend", "/channel/**", "/**").permitAll()
                 .antMatchers("/api/save-playback-time").authenticated()// 정적 리소스 및 인증 없이 접근 가능한 경로 허용
                 .anyRequest().authenticated();  // 나머지 경로는 인증이 필요
 

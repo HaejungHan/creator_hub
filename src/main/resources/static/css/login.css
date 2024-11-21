@@ -1,0 +1,170 @@
+/* 모달 배경 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+/* 모달 내용 */
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;    /* 모달 너비를 90%로 설정 */
+    max-width: 500px;  /* 최대 너비를 500px로 확장 */
+    box-shadow: var(--shadow);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+/* 모달 헤더 */
+.modal-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.modal-header h2 {
+    font-size: 1.8rem;
+    color: var(--dark);
+    margin-bottom: 1rem;
+}
+
+.modal-header p {
+    font-size: 1rem;
+    color: var(--gray);
+}
+
+/* 폼 레이아웃 */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* 세로/가로 중앙 정렬 */
+    gap: 1.5rem; /* 폼 요소들 간의 간격을 넓혀줌 */
+    width: 100%;
+}
+
+/* 폼 그룹 */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem; /* 레이블과 입력란 사이의 간격을 조정 */
+    width: 100%;
+}
+
+/* 레이블 스타일 */
+.form-group label {
+    font-weight: 500;
+    color: var(--dark);
+    font-size: 1.1rem;
+}
+
+/* 입력란 스타일 */
+.form-group input {
+    padding: 1rem;
+    border: 2px solid #eef2f7;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: var(--transition);
+    width: 100%;
+    box-sizing: border-box;  /* 입력란이 부모 요소의 크기를 벗어나지 않도록 설정 */
+}
+
+/* 입력란 포커스 상태 */
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+}
+
+/* 로그인/가입 버튼 */
+.modal-submit {
+    margin-top: 1rem;
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    max-width: 350px; /* 버튼 최대 너비를 350px로 확장 */
+    font-size: 1.2rem; /* 버튼 텍스트 크기 증가 */
+    display: block;  /* 블록 레벨로 변경하여 부모 요소 내에서 중앙 정렬 */
+    margin-left: auto;  /* 수평 중앙 정렬 */
+    margin-right: auto; /* 수평 중앙 정렬 */
+}
+
+/* 버튼 호버 효과 */
+.modal-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(26, 115, 232, 0.2);
+}
+
+/* 모달 창 닫기 버튼 */
+.close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    transition: var(--transition);
+}
+
+.close-modal:hover {
+    color: var(--dark);
+}
+
+/* 회원가입/로그인 링크 버튼 */
+.secondary-button {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 0.8rem 2rem;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 2rem; /* 위쪽 여백을 약간 더 추가 */
+    width: 100%;
+    max-width: 350px; /* 최대 너비 제한 */
+    font-size: 1.1rem;
+}
+
+.secondary-button:hover {
+    background: rgba(26, 115, 232, 0.1);
+    transform: translateY(-2px);
+}
+
+/* 모달 푸터 스타일 */
+.modal-footer {
+    display: flex;
+    flex-direction: column;  /* 버튼들을 세로로 배치 */
+    align-items: center;      /* 세로 중앙 정렬 */
+    justify-content: center;  /* 가로 중앙 정렬 */
+    margin-top: 1.5rem;       /* 푸터 상단 여백 */
+    width: 100%;
+}
+
+/* 애니메이션 */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}

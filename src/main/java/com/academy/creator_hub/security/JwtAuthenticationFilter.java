@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
-        setFilterProcessesUrl("/api/login");
+        setFilterProcessesUrl("/login");
     }
 
     @Override
@@ -57,8 +57,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserRoleEnum role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
         TokenResponseDto tokenResponse = jwtUtil.createToken(username, role);
 
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, tokenResponse.getAccessToken());
-        response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, tokenResponse.getRefreshToken());
+        response.addHeader("Set-Cookie", "access_token=" + tokenResponse.getAccessToken() + "; path=/; HttpOnly; Secure; SameSite=Strict");
+        response.addHeader("Set-Cookie", "refresh_token=" + tokenResponse.getRefreshToken() + "; path=/; HttpOnly; Secure; SameSite=Strict");
 
         // 리프래쉬 토큰 유저 DB에 추가
         userRepository.findByUsername(username).ifPresent(

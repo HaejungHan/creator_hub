@@ -17,7 +17,6 @@ public class User extends Timestamped {
 
     @Indexed(unique = true)
     private String username;
-    private String name;
     private String password;
     private UserRoleEnum role;
     private UserStatus userStatus;
@@ -36,11 +35,10 @@ public class User extends Timestamped {
     }
 
     public User (
-            String username, String password, String name,UserRoleEnum role, UserStatus userStatus,
+            String username, String password, UserRoleEnum role, UserStatus userStatus,
             String refreshToken, List<String> interests) {
         this.username = username;
         this.password = password;
-        this.name = name;
         this.role = role;
         this.userStatus = userStatus;
         this.refreshToken = refreshToken;

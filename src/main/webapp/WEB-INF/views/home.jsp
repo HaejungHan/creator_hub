@@ -20,6 +20,7 @@
   <link rel="icon" href="${pageContext.request.contextPath}/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/sidebar.css"/>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/index.css"/>
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/login.css"/>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -29,6 +30,8 @@
   <div class="sidebar">
     <%@ include file="sidebar.jsp" %>
   </div>
+  <%@ include file="login.jsp" %>
+
 
   <div class="main-content">
     <h2>검색 결과</h2>

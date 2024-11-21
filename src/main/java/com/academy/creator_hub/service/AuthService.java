@@ -34,7 +34,7 @@ public class AuthService {
 
         UserRoleEnum role = UserRoleEnum.USER;
 
-        User user = new User(username, password, requestDto.getName(), role,
+        User user = new User(username, password, role,
                 UserStatus.NORMAL, "", requestDto.getInterests());
 
         userRepository.save(user);
