@@ -1,12 +1,16 @@
 package com.academy.creator_hub.service;
 
+import com.academy.creator_hub.dto.TrendKeywordDto;
 import com.academy.creator_hub.dto.VideoDto;
-import com.academy.creator_hub.model.User;
+import com.academy.creator_hub.model.TrendKeyword;
 import com.academy.creator_hub.repository.RecommendationRepository;
+import com.academy.creator_hub.repository.TrendKeywordsRepository;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,6 +26,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class YouTubeService {
     private final RecommendationRepository recommendationRepository;
+    private final TrendKeywordsRepository trendKeywordsRepository;
+    private final MongoTemplate mongoTemplate;
     private final YouTube youtube;
 
     @Value("${youtube.api.key}")
@@ -50,7 +56,7 @@ public class YouTubeService {
                 .list(Collections.singletonList("snippet"))
                 .setQ(query)
                 .setType(Collections.singletonList("video"))
-                .setMaxResults(6L)
+                .setMaxResults(50L)
                 .setKey(API_KEY);
 
         SearchListResponse response = request.execute();
@@ -91,6 +97,20 @@ public class YouTubeService {
         }
 
         return response.getItems().get(0);  // 첫 번째 채널 정보를 반환
+    }
+
+    public List<TrendKeywordDto> getKeywordTrendsForChart() {
+        Sort sort = Sort.by(Sort.Order.desc("count"));
+
+        List<TrendKeyword> trendKeywords = trendKeywordsRepository.findAll(sort);
+
+        List<TrendKeyword> top10Keywords = trendKeywords.stream()
+                .limit(10)
+                .collect(Collectors.toList());
+
+        return top10Keywords.stream()
+                .map(keyword -> new TrendKeywordDto(keyword.getKeyword(), keyword.getCount()))
+                .collect(Collectors.toList());
     }
 
     private VideoDto getVideoDetails(String videoId) throws IOException {
@@ -137,8 +157,5 @@ public class YouTubeService {
                 contentDetails.getDuration()
         );
     }
-
-
-
 }
 

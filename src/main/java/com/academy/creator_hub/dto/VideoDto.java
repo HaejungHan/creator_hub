@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @NoArgsConstructor
@@ -23,4 +24,5 @@ public class VideoDto {
     private String channelTitle;
     private String categoryId;
     private String duration;
+
 }

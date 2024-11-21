@@ -2,6 +2,7 @@ package com.academy.creator_hub.controller;
 
 
 import com.academy.creator_hub.dto.ChannelResponseDto;
+import com.academy.creator_hub.dto.TrendKeywordDto;
 import com.academy.creator_hub.dto.VideoDto;
 import com.academy.creator_hub.model.VideoRecommendation;
 import com.academy.creator_hub.repository.RecommendationRepository;
@@ -9,22 +10,21 @@ import com.academy.creator_hub.security.UserDetailsImpl;
 import com.academy.creator_hub.service.KeywordAnalysisService;
 import com.academy.creator_hub.service.SparkRecommendationService;
 import com.academy.creator_hub.service.YouTubeService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.Video;
 import lombok.RequiredArgsConstructor;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class YoutubeController {
 
     private final YouTubeService youTubeService;
@@ -32,14 +32,31 @@ public class YoutubeController {
     private final KeywordAnalysisService keywordAnalysisService;
     private final RecommendationRepository  recommendationRepository;
 
-    @GetMapping("/")
-    public String getMainPage() {
-        return "index";
+    @RequestMapping(value = "/home", method = RequestMethod.GET)
+    public String showHomePage(Model model) throws IOException {
+        List<TrendKeywordDto> trendKeywords = youTubeService.getKeywordTrendsForChart();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        model.addAttribute("trendKeywordsJson", objectMapper.writeValueAsString(trendKeywords));
+
+        return "home";
     }
 
-    @GetMapping("/search")
-    public List<VideoDto> searchVideos(@RequestParam String query) throws IOException {
-        return youTubeService.searchVideos(query);
+    // 동영상 검색 (비동기 처리)
+    @RequestMapping(value = "/searchVideos", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> searchVideos(@RequestParam String query) throws IOException {
+        List<VideoDto> videos = new ArrayList<>();
+
+        if (query != null && !query.trim().isEmpty()) {
+            videos = youTubeService.searchVideos(query);
+        }
+
+        // 검색 결과를 JSON 형태로 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("videos", videos);
+        return response;
     }
 
     @GetMapping("/popular")
@@ -63,7 +80,6 @@ public class YoutubeController {
            sparkRecommendationService.generateRecommendations(userDetails.getUsername());
     }
 
-
     @GetMapping("/channel/{channelId}")
     public ChannelResponseDto getChannelInfo(@PathVariable String channelId) {
         try {
@@ -84,9 +100,5 @@ public class YoutubeController {
         }
     }
 
-//    @GetMapping("/keywords/trend")
-//    public void getKeywordTrends() {
-//        keywordAnalysisService.analyzeKeywordTrendsAndSave();
-//    }
 }
 

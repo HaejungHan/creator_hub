@@ -47,7 +47,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     // Janino 의존성 추가
     implementation 'org.codehaus.janino:janino:3.1.4'
-
     // spring batch
     implementation 'org.springframework.batch:spring-batch-core'
     implementation 'org.springframework.boot:spring-boot-starter-batch'
