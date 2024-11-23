@@ -76,9 +76,11 @@ public class YoutubeController {
         return youTubeService.getPopularVideos();
     }
 
-    @GetMapping("/video/{id}")
-    public Video getVideoById(@PathVariable String id, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        return youTubeService.getVideoId(id);
+    @RequestMapping(value ="/video/{videoId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Video getVideoById(@PathVariable(value = "videoId") String videoId, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+        System.out.println("Fetching video for ID: " + videoId);
+        return youTubeService.getVideoId(videoId);
     }
 
     @GetMapping("/recommendations")

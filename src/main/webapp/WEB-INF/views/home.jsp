@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/login.css"/>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 
 <body>
@@ -32,20 +33,17 @@
   </div>
   <%@ include file="login.jsp" %>
 
-
   <div class="main-content">
     <h2>검색 결과</h2>
 
     <div class="home-search-container">
-
         <div class="search-bar">
           <label for="searchInput"></label>
-          <input type="text" placeholder="영감을 찾아보세요..." id="searchInput" name="query" value="${param.query}">
+          <input type="text" placeholder="검색어를 입력해주세요...." id="searchInput" name="query" value="${param.query}">
           <button id="searchButton" type="button" class="search-button">
             <i class="fas fa-search"></i> 검색
           </button>
         </div>
-
 
       <!-- 인기 키워드 섹션 -->
       <div class="trending-tags">
@@ -63,11 +61,40 @@
       <div class="video-grid" id="allVideos">
         <!-- 비디오 카드 데이터는 자바스크립트로 동적으로 생성 -->
       </div>
+
     <div id="pagination"></div>
   </div>
   </div>
+<!-- 비디오 모달 (모달 HTML 추가) -->
+<div class="video-modal" style="display: none;">
+  <div class="video-modal-content">
+    <button class="close-modal">&times;</button>
+    <div class="video-player-container">
+      <!-- iframe으로 유튜브 비디오를 삽입 -->
+      <iframe class="video-player" width="560" height="315" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="video-details">
+      <div class="video-details-header">
+        <h2 class="video-details-title"></h2>
+        <div class="video-details-stats">
+          <span class="video-views"></span>
+          <span class="video-comments"></span> <!-- 댓글 수 -->
+          <span class="video-likes"></span> <!-- 좋아요 수 -->
+        </div>
+      </div>
+      <div class="video-creator">
+        <div class="creator-avatar"></div>
+        <div class="creator-info">
+          <div class="creator-name"></div>
+          <div class="creator-subscribers"></div>
+        </div>
+      </div>
+      <div class="video-description"></div>
+    </div>
+  </div>
+</div>
 
-<script type="text/javascript">
+<script>
   $(document).ready(function () {
     const searchInput = $('#searchInput');
     const searchButton = $('#searchButton');
@@ -167,7 +194,6 @@
       if (videosData && videosData.length > 0) {
         videosData.forEach(video => {
           const videoCard = generateVideoCard(video);
-          console.log("Generated Video Card:", videoCard);
           videoGrid.append(videoCard);
         });
         noResultsMessage.hide();
@@ -177,10 +203,7 @@
     }
 
     function generateVideoCard(video) {
-      console.log(video);
       const formattedDuration = formatDuration(video.duration);
-      console.log(formattedDuration);
-      console.log(video.duration);
       const publishedAt = new Date(video.publishedAt);
       const formattedDate = new Intl.DateTimeFormat('ko-KR', {
         year: 'numeric',
@@ -188,10 +211,18 @@
         day: 'numeric',
       }).format(publishedAt);
 
-      const videoCard = $('<div>').addClass('video-card');
+      console.log('video.videoId:', video.videoId);
+
+      const videoCard = $('<div>').addClass('video-card').attr('data-videoId', video.videoId);
       const videoThumbnail = $('<div>').addClass('thumbnail');
-      const thumbnailImg = $('<img>')
-              .attr('src', video.thumbnailUrl.replace('maxresdefault', 'hqdefault'))
+      const thumbnailImg = $('<img>');
+
+      const thumbnailUrl = video.thumbnailUrl.includes('maxresdefault')
+              ? video.thumbnailUrl // maxresdefault 썸네일 사용
+              : video.thumbnailUrl.replace('hqdefault', 'sddefault');
+
+      thumbnailImg
+              .attr('src', thumbnailUrl)
               .attr('alt', 'Thumbnail')
               .css({
                 'width': '100%',
@@ -212,7 +243,6 @@
 
       videoStats.append(views, uploadDate);
       videoInfo.append(videoTitle, videoStats);
-
       videoCard.append(videoThumbnail, videoInfo);
 
       return videoCard;
@@ -338,7 +368,74 @@
         performSearch();
       }
     });
+
+    $(document).on('click', '.video-card', function () {
+      const videoId = $(this).data('videoid');
+      console.log('Opening modal for videoId:', videoId);
+      if (videoId) {
+        openModal(videoId);
+      } else {
+        console.error('Error: videoId is undefined');
+      }
+    });
+
+    let player;
+
+    function onYouTubeIframeAPIReady() {
+      const iframe = document.querySelector('.video-modal .video-player');
+
+      if (iframe) {
+        player = new YT.Player(iframe, {
+          events: {
+            'onReady': onPlayerReady,
+          }
+        });
+      }
+    }
+
+    function openModal(videoId) {
+      console.log("modal videoId : " + videoId);
+      fetch('/video/' + videoId)
+              .then(response => response.json())
+              .then(videoData => {
+                const videoModal = document.querySelector('.video-modal');
+                videoModal.querySelector('.video-details-title').textContent = videoData.snippet.localized.title;
+                videoModal.querySelector('.video-views').textContent = '조회수: ' + videoData.statistics.viewCount;
+                videoModal.querySelector('.video-comments').textContent = '댓글 수: ' + videoData.statistics.commentCount;
+                videoModal.querySelector('.video-likes').textContent = '좋아요 수: ' + videoData.statistics.likeCount;
+                videoModal.querySelector('.video-player').src = "https://www.youtube.com/embed/" + videoId;
+                videoModal.querySelector('.creator-name').textContent = videoData.snippet.channelTitle;
+                videoModal.querySelector('.video-description').textContent = videoData.snippet.description;
+                videoModal.style.display = 'flex';
+              })
+              .catch(error => console.error('비디오 데이터를 가져오는 데 오류 발생:', error));
+    }
+
+// 모달 창을 닫는 함수
+    function closeModal() {
+      const videoModal = document.querySelector('.video-modal');
+
+      videoModal.style.display = 'none';
+
+      // YouTube Player가 존재하면 동영상 멈추기
+      if (player) {
+        player.stopVideo();  // 동영상 멈추고 소리도 끄기
+      }
+      const videoIframe = document.querySelector('.video-modal .video-player');
+      if (videoIframe) {
+        videoIframe.src = '';  // iframe src 초기화로 동영상 멈추기
+      }
+    }
+
+    $('.video-modal').on('click', function (e) {
+      if ($(e.target).is('.video-modal')) {
+        closeModal();
+      }
+    });
+
+    $('.video-modal .close-modal').on('click', closeModal);
   });
+
 </script>
 </body>
 </html>

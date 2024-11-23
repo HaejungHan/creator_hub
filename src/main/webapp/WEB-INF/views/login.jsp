@@ -34,7 +34,6 @@
 </div>
 </div>
 
-<!-- 회원가입 모달 -->
 <div class="modal" id="signupModal" style="display:none;">
     <div class="modal-content">
         <span class="close-modal" data-modal="signupModal">&times;</span>
@@ -75,7 +74,6 @@
             </div>
             <button type="submit" class="modal-submit">가입하기</button>
         </form>
-        <!-- 회원가입 모달의 푸터를 form 외부로 이동 -->
         <div class="modal-footer">
             <p>이미 계정이 있으신가요?</p>
             <button id="showLoginBtn" class="secondary-button">로그인</button>
@@ -92,15 +90,6 @@
         const showLoginBtn = document.getElementById('showLoginBtn');
         const closeButtons = document.querySelectorAll('.close-modal');
 
-        function setTokensToCookie(accessToken, refreshToken) {
-            if (accessToken) {
-                document.cookie = `access_token=${accessToken}; path=/; secure; HttpOnly; SameSite=Strict;`;
-            }
-            if (refreshToken) {
-                document.cookie = `refresh_token=${refreshToken}; path=/; secure; HttpOnly; SameSite=Strict;`;
-            }
-        }
-
         function handleLogin(event) {
             event.preventDefault();  // 폼 제출 기본 동작 방지
 
@@ -113,24 +102,24 @@
                 return;
             }
 
-            // 서버로 POST 요청을 보냄 (credentials: 'include'로 쿠키 자동 포함)
             fetch('/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    username: email,  // email을 username으로 보내야 합니다.
+                    username: email,
                     password: password,
                 }),
-                credentials: 'include',  // 쿠키를 포함하여 요청
+                credentials: 'include',
             })
                 .then(response => {
-                    // 로그인 성공 후 모달 닫기
-                    loginModal.style.display = 'none'; // 로그인 모달 닫기
+                    loginModal.style.display = 'none';
                     document.body.style.overflow = 'auto'; // 페이지 스크롤 활성화
 
                     alert('로그인 성공!');
+
+                    window.location.reload();
                 })
                 .catch(error => {
                     console.error('로그인 실패', error);

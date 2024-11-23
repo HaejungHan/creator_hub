@@ -81,7 +81,7 @@ public class YouTubeService {
 
         VideoListResponse response = request.execute();
         if (response.getItems().isEmpty()) {
-            return null;
+            throw new IllegalArgumentException("동영상 정보를 찾을 수 없습니다.");
         }
         return response.getItems().get(0);
     }

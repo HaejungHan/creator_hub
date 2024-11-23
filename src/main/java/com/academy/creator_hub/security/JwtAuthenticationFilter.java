@@ -57,17 +57,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserRoleEnum role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
         TokenResponseDto tokenResponse = jwtUtil.createToken(username, role);
 
-        response.addHeader("Set-Cookie", "access_token=" + tokenResponse.getAccessToken() + "; path=/; HttpOnly; Secure; SameSite=Strict");
-        response.addHeader("Set-Cookie", "refresh_token=" + tokenResponse.getRefreshToken() + "; path=/; HttpOnly; Secure; SameSite=Strict");
+        response.addHeader("Set-Cookie", "access_token=" + tokenResponse.getAccessToken() + "; path=/; Secure; SameSite=Strict");
+        response.addHeader("Set-Cookie", "refresh_token=" + tokenResponse.getRefreshToken() + "; path=/; Secure; SameSite=Strict");
 
-        // 리프래쉬 토큰 유저 DB에 추가
         userRepository.findByUsername(username).ifPresent(
                 user -> {
                     user.updateRefresh(tokenResponse.getRefreshToken());
                     userRepository.save(user);
                 }
         );
-
         responseBody(response);
     }
 

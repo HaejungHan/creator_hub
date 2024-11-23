@@ -2,6 +2,7 @@ package com.academy.creator_hub.config;
 
 import com.academy.creator_hub.model.Videos;
 import com.academy.creator_hub.repository.VideoRepository;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import org.springframework.batch.core.Job;
@@ -24,6 +25,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -112,7 +114,14 @@ public class YouTubeBatchConfig {
 
             } while (nextPageToken != null);
 
+        } catch (GoogleJsonResponseException e) {
+            System.err.println("YouTube API error: " + e.getDetails());
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("IOException while calling YouTube API: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
+            System.err.println("Unexpected error while fetching videos: " + e.getMessage());
             e.printStackTrace();
         }
         if (allVideos.isEmpty()) {
@@ -133,6 +142,11 @@ public class YouTubeBatchConfig {
             VideoSnippet snippet = video.getSnippet();
             VideoStatistics statistics = video.getStatistics();
             VideoContentDetails contentDetails = video.getContentDetails();
+
+            if (snippet == null || statistics == null || contentDetails == null) {
+                System.out.println("유효하지 않은 video 데이터 발견, 일부 데이터가 누락되었습니다.");
+                return null;
+            }
 
             LocalDateTime publishedAt = null;
             if (snippet.getPublishedAt() != null) {
