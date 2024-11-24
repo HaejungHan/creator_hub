@@ -1,7 +1,7 @@
 package com.academy.creator_hub;
 
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -9,10 +9,10 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableMongoRepositories(basePackages = "com.academy.creator_hub.repository")
+@EnableMongoRepositories(basePackages =
+        { "com.academy.creator_hub.domain.auth.repository", "com.academy.creator_hub.domain.youtube.repository"})
 @EnableMongoAuditing
 @EnableScheduling
-@EnableBatchProcessing
 @SpringBootApplication
 public class CreatorHubApplication extends SpringBootServletInitializer {
     public static void main(String[] args) {

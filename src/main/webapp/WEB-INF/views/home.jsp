@@ -8,7 +8,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ page pageEncoding="UTF-8" %>
 
 <html>
@@ -215,21 +215,8 @@
 
       const videoCard = $('<div>').addClass('video-card').attr('data-videoId', video.videoId);
       const videoThumbnail = $('<div>').addClass('thumbnail');
-      const thumbnailImg = $('<img>');
 
-      const thumbnailUrl = video.thumbnailUrl.includes('maxresdefault')
-              ? video.thumbnailUrl // maxresdefault 썸네일 사용
-              : video.thumbnailUrl.replace('hqdefault', 'sddefault');
-
-      thumbnailImg
-              .attr('src', thumbnailUrl)
-              .attr('alt', 'Thumbnail')
-              .css({
-                'width': '100%',
-                'height': '100%',
-                'object-fit': 'contain',
-                'object-position': 'center',
-              });
+      const thumbnailImg = $('<img>').attr('src', video.thumbnailUrl).attr('alt', 'Thumbnail');
 
       const videoDuration = $('<span>').addClass('duration').text(formattedDuration);
       videoThumbnail.append(thumbnailImg, videoDuration);

@@ -15,15 +15,18 @@
       <span>Creator_hub</span>
     </div>
 
+    <a href="${pageContext.request.contextPath}/home">
     <div class="menu-item active" data-category="home">
       <i class="fas fa-home"></i>
       <span>홈</span>
     </div>
 
+    <a href="${pageContext.request.contextPath}/popular">
     <div class="menu-item" data-category="popular">
       <i class="fas fa-fire"></i>
-      <span>인기 동영상</span>
+      <span>인기 동영상 TOP 10</span>
     </div>
+    </a>
 
     <div class="menu-item" data-category="recommended">
       <i class="fas fa-star"></i>

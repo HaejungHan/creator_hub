@@ -1,7 +1,7 @@
 package com.academy.creator_hub.security;
 
-import com.academy.creator_hub.model.User;
-import com.academy.creator_hub.repository.UserRepository;
+import com.academy.creator_hub.domain.auth.model.User;
+import com.academy.creator_hub.domain.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

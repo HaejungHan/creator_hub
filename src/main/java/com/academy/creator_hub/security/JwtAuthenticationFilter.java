@@ -1,10 +1,10 @@
 package com.academy.creator_hub.security;
 
-import com.academy.creator_hub.dto.LoginRequestDto;
-import com.academy.creator_hub.dto.TokenResponseDto;
-import com.academy.creator_hub.model.UserRoleEnum;
+import com.academy.creator_hub.domain.auth.dto.LoginRequestDto;
+import com.academy.creator_hub.domain.auth.dto.TokenResponseDto;
+import com.academy.creator_hub.domain.auth.model.UserRoleEnum;
 import com.academy.creator_hub.jwt.JwtUtil;
-import com.academy.creator_hub.repository.UserRepository;
+import com.academy.creator_hub.domain.auth.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

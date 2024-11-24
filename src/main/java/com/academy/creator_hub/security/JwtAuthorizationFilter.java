@@ -1,6 +1,6 @@
 package com.academy.creator_hub.security;
 
-import com.academy.creator_hub.model.UserRoleEnum;
+import com.academy.creator_hub.domain.auth.model.UserRoleEnum;
 import com.academy.creator_hub.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

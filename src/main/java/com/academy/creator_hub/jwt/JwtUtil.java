@@ -1,7 +1,7 @@
 package com.academy.creator_hub.jwt;
 
-import com.academy.creator_hub.dto.TokenResponseDto;
-import com.academy.creator_hub.model.UserRoleEnum;
+import com.academy.creator_hub.domain.auth.dto.TokenResponseDto;
+import com.academy.creator_hub.domain.auth.model.UserRoleEnum;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
