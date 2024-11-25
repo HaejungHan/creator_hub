@@ -11,6 +11,7 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.functions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -35,7 +36,13 @@ public class SparkRecommendationService {
         this.recommendationRepository = recommendationRepository;
     }
 
+    @Async
     public void generateRecommendations(String username) {
+        if (recommendationRepository.existsByUsername(username)) {
+            // 이미 추천 데이터가 존재하면 메서드를 종료하고 추가 작업을 하지 않음
+            System.out.println("추천 데이터가 이미 존재합니다. 생성하지 않습니다.");
+            return;
+        }
         Dataset<Row> userInterests = getUserInterests(username);
         Dataset<Row> videos = getVideos();
         Dataset<Row> userKeywords = extractKeywords(userInterests, "interestsString");

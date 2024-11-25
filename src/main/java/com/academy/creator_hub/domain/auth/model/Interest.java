@@ -23,4 +23,5 @@ public enum Interest {
     public String getDisplayName() {
         return displayName;
     }
+
 }

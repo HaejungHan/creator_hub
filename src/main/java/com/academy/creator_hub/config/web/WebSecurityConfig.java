@@ -1,5 +1,6 @@
 package com.academy.creator_hub.config.web;
 
+import com.academy.creator_hub.domain.youtube.service.SparkRecommendationService;
 import com.academy.creator_hub.jwt.JwtUtil;
 import com.academy.creator_hub.domain.auth.repository.UserRepository;
 import com.academy.creator_hub.security.JwtAuthenticationFilter;
@@ -21,19 +22,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final UserRepository userRepository;
+    private final SparkRecommendationService sparkRecommendationService;
 
-    public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, UserRepository userRepository) {
+    public WebSecurityConfig(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, UserRepository userRepository, SparkRecommendationService sparkRecommendationService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
+        this.sparkRecommendationService = sparkRecommendationService;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()  // CSRF 보호 비활성화 (필요시 활성화)
                 .authorizeRequests()
-                .antMatchers("/css/**", "/js/**", "/images/**", "/main", "/signup", "/login", "/popular", "/search", "/video/**", "/generate", "/keywords/trend", "/channel/**", "/**").permitAll()
-//                .antMatchers("").authenticated()// 정적 리소스 및 인증 없이 접근 가능한 경로 허용
+                .antMatchers("/css/**", "/images/**", "/main", "/signup", "/login", "/popular", "/search", "/video/**", "/keywords/trend", "/**").permitAll()
                 .anyRequest().authenticated();  // 나머지 경로는 인증이 필요
 
         // JWT 인증 및 인가 필터 추가
@@ -43,7 +45,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, userRepository);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, userRepository, sparkRecommendationService);
         filter.setAuthenticationManager(authenticationManager());
         filter.setFilterProcessesUrl("/login");  // 로그인 경로 설정
         return filter;

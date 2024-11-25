@@ -3,6 +3,7 @@ package com.academy.creator_hub.security;
 import com.academy.creator_hub.domain.auth.dto.LoginRequestDto;
 import com.academy.creator_hub.domain.auth.dto.TokenResponseDto;
 import com.academy.creator_hub.domain.auth.model.UserRoleEnum;
+import com.academy.creator_hub.domain.youtube.service.SparkRecommendationService;
 import com.academy.creator_hub.jwt.JwtUtil;
 import com.academy.creator_hub.domain.auth.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,16 +18,19 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.SerializablePermission;
 
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final SparkRecommendationService sparkRecommendationService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository, SparkRecommendationService sparkRecommendationService) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.sparkRecommendationService = sparkRecommendationService;
         setFilterProcessesUrl("/login");
     }
 
@@ -66,13 +70,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     userRepository.save(user);
                 }
         );
+
+        sparkRecommendationService.generateRecommendations(username);
         responseBody(response);
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         log.info("로그인 실패");
-        response.setStatus(401);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 401 Unauthorized
+        response.setContentType("application/json");
+        response.getWriter().write("{\"message\":\"로그인 실패: 아이디나 비밀번호를 확인해주세요.\"}");
     }
 
     private String responseBody(HttpServletResponse response) {

@@ -83,67 +83,73 @@
 
 <!-- JavaScript -->
 <script>
-        const signupModal = document.getElementById('signupModal');
-        const showSignupBtn = document.getElementById('showSignupBtn');
-        const loginModal = document.getElementById('loginModal');
-        const loginBtn = document.getElementById('loginBtn');
-        const showLoginBtn = document.getElementById('showLoginBtn');
-        const closeButtons = document.querySelectorAll('.close-modal');
+    const signupModal = document.getElementById('signupModal');
+    const showSignupBtn = document.getElementById('showSignupBtn');
+    const loginModal = document.getElementById('loginModal');
+    const loginBtn = document.getElementById('loginBtn');
+    const showLoginBtn = document.getElementById('showLoginBtn');
+    const closeButtons = document.querySelectorAll('.close-modal');
+    const interestError = document.getElementById('interestError'); // 관심사 오류 메시지
 
-        function handleLogin(event) {
-            event.preventDefault();  // 폼 제출 기본 동작 방지
+    function handleLogin(event) {
+        event.preventDefault();  // 폼 제출 기본 동작 방지
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-            // 이메일과 비밀번호가 비어있는지 확인
-            if (!email || !password) {
-                alert('이메일과 비밀번호는 필수 입력 사항입니다.');
-                return;
-            }
-
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: email,
-                    password: password,
-                }),
-                credentials: 'include',
-            })
-                .then(response => {
-                    loginModal.style.display = 'none';
-                    document.body.style.overflow = 'auto'; // 페이지 스크롤 활성화
-
-                    alert('로그인 성공!');
-
-                    window.location.reload();
-                })
-                .catch(error => {
-                    console.error('로그인 실패', error);
-                    alert('로그인에 실패했습니다. 다시 시도해주세요.');
-                });
+        // 이메일과 비밀번호가 비어있는지 확인
+        if (!email || !password) {
+            alert('이메일과 비밀번호는 필수 입력 사항입니다.');
+            return;
         }
 
-        // 로그인 폼 제출 이벤트
-        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: email,
+                password: password,
+            }),
+            credentials: 'include',  // 쿠키 포함
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message);
+                    });
+                }
 
-        // 로그인 버튼 클릭 시 로그인 모달 열기
-        loginBtn.addEventListener('click', () => {
+                loginModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // 페이지 스크롤 활성화
+
+                alert('로그인 성공!');
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('로그인 실패:', error);
+                alert('로그인에 실패했습니다. 다시 시도해주세요.');
+            });
+    }
+
+    // 로그인 폼 제출 이벤트
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+
+    // 로그인 버튼 클릭 시 로그인 모달 열기
+    loginBtn.addEventListener('click', () => {
         loginModal.style.display = 'block';
         document.body.style.overflow = 'hidden';
     });
 
-        // 회원가입 버튼 클릭 시 로그인 모달을 회원가입 모달로 변경
-        showSignupBtn.addEventListener('click', () => {
+    // 회원가입 버튼 클릭 시 로그인 모달을 회원가입 모달로 변경
+    showSignupBtn.addEventListener('click', () => {
         loginModal.style.display = 'none';
         signupModal.style.display = 'block';
     });
 
-        // 회원가입 폼 처리
-        function handleSignup(event) {
+    // 회원가입 폼 처리
+    function handleSignup(event) {
         event.preventDefault();  // 폼 제출 기본 동작 방지
 
         const email = document.getElementById('signupEmail').value;
@@ -152,57 +158,68 @@
 
         // 비밀번호 확인이 일치하는지 체크
         if (password !== passwordConfirm) {
-        alert('비밀번호가 일치하지 않습니다.');
-        return;
-    }
+            alert('비밀번호가 일치하지 않습니다.');
+            return;
+        }
 
         // 선택된 관심사들을 배열로 가져오기
         const selectedInterests = Array.from(document.querySelectorAll('input[name="interests"]:checked'))
-        .map(input => input.value);
+            .map(input => input.value);
 
         // 관심사를 3개 선택했는지 확인
         if (selectedInterests.length !== 3) {
-        document.getElementById('interestError').style.display = 'block';
-        return;
-    } else {
-        document.getElementById('interestError').style.display = 'none';
-    }
+            interestError.style.display = 'block';
+            return;
+        } else {
+            interestError.style.display = 'none';
+        }
 
-        // 서버로 POST 요청을 보냄
+        // 회원가입 요청 보내기
         fetch('/signup', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-    },
-        body: JSON.stringify({
-        username: email,  // 이메일을 username으로 보내기
-        password: password,
-        interests: selectedInterests  // 관심사 배열 전송
-    })
-    })
-        .then(data => {
-        console.log('회원가입 성공:', data);
-        alert('회원가입이 완료되었습니다!');
-        signupModal.style.display = 'none';  // 회원가입 완료 후 모달 닫기
-        loginModal.style.display = 'block';  // 로그인 모달 열기
-    })
-        .catch(error => {
-        console.error('회원가입 실패:', error);
-        alert('회원가입 실패! 다시 시도해주세요.');
-    });
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: email,
+                password: password,
+                interests: selectedInterests
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    // 서버에서 응답한 JSON 메시지를 처리
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message);  // 예외 처리
+                    });
+                }
+                return response.json();  // 정상적인 응답일 경우
+            })
+            .then(data => {
+                console.log('회원가입 성공:', data);
+                if (data.message === "회원가입이 완료되었습니다.") {
+                    alert('회원가입이 완료되었습니다!');
+                    signupModal.style.display = 'none';
+                    loginModal.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('회원가입 실패:', error);
+                alert('회원가입 실패! 다시 시도해주세요.');
+            });
     }
 
-        // 회원가입 폼 제출 이벤트
-        document.getElementById('signupForm').addEventListener('submit', handleSignup);
+    // 회원가입 폼 제출 이벤트
+    document.getElementById('signupForm').addEventListener('submit', handleSignup);
 
-        // 로그인 버튼 클릭 시 회원가입 모달을 로그인 모달로 변경
-        showLoginBtn.addEventListener('click', () => {
+    // 로그인 버튼 클릭 시 회원가입 모달을 로그인 모달로 변경
+    showLoginBtn.addEventListener('click', () => {
         signupModal.style.display = 'none';
         loginModal.style.display = 'block';
     });
 
-        // 모달 닫기 버튼 이벤트 리스너
-        closeButtons.forEach(button => {
+    // 모달 닫기 버튼 이벤트 리스너
+    closeButtons.forEach(button => {
         button.addEventListener('click', () => {
             const modalId = button.getAttribute('data-modal');
             document.getElementById(modalId).style.display = 'none';
@@ -210,13 +227,14 @@
         });
     });
 
-        // 배경 클릭 시 모달 닫기
-        window.addEventListener('click', (e) => {
+    // 배경 클릭 시 모달 닫기
+    window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
-        e.target.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
+            e.target.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
     });
-
 </script>
+
+
 

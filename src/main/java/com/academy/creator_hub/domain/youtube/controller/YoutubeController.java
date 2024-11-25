@@ -2,6 +2,7 @@ package com.academy.creator_hub.domain.youtube.controller;
 import com.academy.creator_hub.domain.youtube.dto.ChannelResponseDto;
 import com.academy.creator_hub.domain.youtube.dto.TrendKeywordDto;
 import com.academy.creator_hub.domain.youtube.dto.VideoDto;
+import com.academy.creator_hub.domain.youtube.dto.VideoRecommandationDto;
 import com.academy.creator_hub.domain.youtube.model.VideoRecommendation;
 import com.academy.creator_hub.domain.youtube.repository.RecommendationRepository;
 import com.academy.creator_hub.security.UserDetailsImpl;
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.Video;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -90,15 +93,30 @@ public class YoutubeController {
         return "popularVideo";
     }
 
-    @GetMapping("/recommendations")
-    public VideoRecommendation getRecommendations(@AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        Optional<VideoRecommendation> recommendation = recommendationRepository.findByUsername(userDetails.getUsername());
-        return recommendation.orElse(null);
+    @RequestMapping(value = "/recommendations", method = RequestMethod.GET)
+    public String recommendationPage() {
+        return "recommendationVideo";
     }
 
-    @PostMapping("/generate")
-    public void generateRecommendations(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        sparkRecommendationService.generateRecommendations(userDetails.getUsername());
+    @RequestMapping(value = "/recommendation", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> getRecommendations(@AuthenticationPrincipal UserDetailsImpl userDetails) throws JsonProcessingException {
+
+        if (userDetails == null) {
+            throw new IllegalArgumentException("로그인 필요");
+        }
+
+        Map<String, Object> response = new HashMap<>();
+
+        String username = userDetails.getUsername();
+        List<VideoRecommandationDto> recommendations = youTubeService.getRecommendationsForUser(username);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String recommendationsJson = recommendations.isEmpty() ? "[]" : objectMapper.writeValueAsString(recommendations);
+
+        response.put("recommendations", recommendationsJson);
+        return response;
     }
 
     @GetMapping("/channel/{channelId}")

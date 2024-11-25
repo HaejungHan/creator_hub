@@ -121,7 +121,6 @@
         return videoCard;
     }
 
-    // 지속적인 동영상 재생시간 포맷
     function formatDuration(duration) {
         const regex = /^PT(\d+H)?(\d+M)?(\d+S)?$/;
         const matches = duration.match(regex);

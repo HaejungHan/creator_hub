@@ -2,8 +2,11 @@ package com.academy.creator_hub.domain.youtube.service;
 
 import com.academy.creator_hub.domain.youtube.dto.TrendKeywordDto;
 import com.academy.creator_hub.domain.youtube.dto.VideoDto;
+import com.academy.creator_hub.domain.youtube.dto.VideoRecommandationDto;
 import com.academy.creator_hub.domain.youtube.model.TrendKeyword;
+import com.academy.creator_hub.domain.youtube.model.VideoRecommendation;
 import com.academy.creator_hub.domain.youtube.model.Videos;
+import com.academy.creator_hub.domain.youtube.repository.RecommendationRepository;
 import com.academy.creator_hub.domain.youtube.repository.TrendKeywordsRepository;
 import com.academy.creator_hub.domain.youtube.repository.VideoRepository;
 import com.google.api.services.youtube.YouTube;
@@ -20,12 +23,14 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class YouTubeService {
     private final TrendKeywordsRepository trendKeywordsRepository;
+    private final RecommendationRepository recommendationRepository;
     private final VideoRepository videoRepository;
     private final YouTube youtube;
 
@@ -101,6 +106,11 @@ public class YouTubeService {
         return top10Keywords.stream()
                 .map(keyword -> new TrendKeywordDto(keyword.getKeyword(), keyword.getCount()))
                 .collect(Collectors.toList());
+    }
+
+    public List<VideoRecommandationDto> getRecommendationsForUser(String username) {
+        Optional<VideoRecommendation> videoRecommendation = recommendationRepository.findByUsername(username);
+        return videoRecommendation.map(VideoRecommendation::getRecommendations).orElseGet(ArrayList::new);
     }
 
     private VideoDto getVideoDetails(String videoId) throws IOException {

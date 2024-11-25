@@ -20,6 +20,7 @@
       <i class="fas fa-home"></i>
       <span>홈</span>
     </div>
+    </a>
 
     <a href="${pageContext.request.contextPath}/popular">
     <div class="menu-item" data-category="popular">
@@ -28,15 +29,18 @@
     </div>
     </a>
 
+      <a href="${pageContext.request.contextPath}/recommendations">
     <div class="menu-item" data-category="recommended">
       <i class="fas fa-star"></i>
       <span>추천 동영상</span>
     </div>
+      </a>
 
     <button class="auth-button-side login-btn" id="loginBtn">
       <i class="fas fa-sign-in-alt"></i>
       <span>로그인</span>
     </button>
+
   </div>
 </div>
 <script>
@@ -61,11 +65,14 @@
     if (loginBtn) {
       loginBtn.addEventListener('click', function(event) {
         if (getCookie('access_token')) {
-          document.cookie = "access_token=; path=/; secure; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-          document.cookie = "refresh_token=; path=/; secure; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
-          updateAuthButton();
-          alert('로그아웃 성공!');
+          // 로그아웃 처리
+          deleteCookie('access_token');
+          deleteCookie('refresh_token');
+
+          // 홈 화면으로 리디렉션
+          window.location.href = "${pageContext.request.contextPath}/home";
         } else {
+          // 로그인 모달 표시
           document.getElementById('loginModal').style.display = 'block';
           document.body.style.overflow = 'hidden';
         }
@@ -75,17 +82,23 @@
     updateAuthButton();
   });
 
+  function deleteCookie(name) {
+    document.cookie = name + "=; path=/; secure; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+  }
+
   function updateAuthButton() {
     const loginBtn = document.getElementById('loginBtn');
     const accessToken = getCookie('access_token');
     console.log('Access Token:', accessToken);
 
-    if (accessToken) {
-      loginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i><span>로그아웃</span>';
-      loginBtn.setAttribute('id', 'logoutBtn');
-    } else {
-      loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>로그인</span>';
-      loginBtn.setAttribute('id', 'loginBtn');
+    if (loginBtn) {
+      if (accessToken) {
+        loginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i><span>로그아웃</span>';
+        loginBtn.setAttribute('id', 'logoutBtn');
+      } else {
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>로그인</span>';
+        loginBtn.setAttribute('id', 'loginBtn');
+      }
     }
   }
 </script>

@@ -1,5 +1,6 @@
 package com.academy.creator_hub.domain.auth.dto;
 
+import com.academy.creator_hub.domain.auth.model.Interest;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,5 +23,5 @@ public class SignupRequestDto {
 
     @NotNull(message = "관심사는 필수 선택 사항입니다.")
     @Size(min = 1, max = 3, message = "최소 1개이상 3개이하로 선택하세요.")
-    private List<String> interests;
+    private List<Interest> interests;
 }
