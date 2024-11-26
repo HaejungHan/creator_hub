@@ -39,7 +39,6 @@ public class SparkRecommendationService {
     @Async
     public void generateRecommendations(String username) {
         if (recommendationRepository.existsByUsername(username)) {
-            // 이미 추천 데이터가 존재하면 메서드를 종료하고 추가 작업을 하지 않음
             System.out.println("추천 데이터가 이미 존재합니다. 생성하지 않습니다.");
             return;
         }

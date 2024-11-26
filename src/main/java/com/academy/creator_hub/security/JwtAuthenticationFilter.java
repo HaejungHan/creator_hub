@@ -61,8 +61,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserRoleEnum role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
         TokenResponseDto tokenResponse = jwtUtil.createToken(username, role);
 
-        response.addHeader("Set-Cookie", "access_token=" + tokenResponse.getAccessToken() + "; path=/; Secure; SameSite=Strict");
-        response.addHeader("Set-Cookie", "refresh_token=" + tokenResponse.getRefreshToken() + "; path=/; Secure; SameSite=Strict");
+        response.addHeader("Set-Cookie", "access_token=" + tokenResponse.getAccessToken() + "; path=/; SameSite=Lax");
+        response.addHeader("Set-Cookie", "refresh_token=" + tokenResponse.getRefreshToken() + "; path=/; SameSite=Lax");
 
         userRepository.findByUsername(username).ifPresent(
                 user -> {

@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '2.7.18'
     id 'io.spring.dependency-management' version '1.1.6'
-    id 'war' // WAR
+    id 'war'
 }
 
 group = 'com.academy'
@@ -29,7 +29,8 @@ repositories {
 
 dependencies {
     // JSP
-    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
     implementation group: 'javax.servlet', name: 'jstl', version: '1.2'
     // Tomcat server
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
@@ -51,7 +52,7 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter:2.7.5'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security:2.7.18'
     implementation 'org.springframework.boot:spring-boot-starter-logging'
@@ -67,12 +68,9 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('war') {
-    enabled = true // WAR 파일 생성 가능
-}
-
-tasks.named('bootWar') {
-    enabled = true // Spring Boot WAR 생성 가능
+war {
+    archiveBaseName = 'creator_hub'  // WAR 파일 이름 설정
+    archiveVersion = '0.1.0'          // WAR 파일 버전 설정
 }
 
 tasks.withType(JavaExec) {
@@ -81,4 +79,6 @@ tasks.withType(JavaExec) {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
 }

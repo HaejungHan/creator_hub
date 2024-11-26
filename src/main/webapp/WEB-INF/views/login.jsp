@@ -188,20 +188,14 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    // 서버에서 응답한 JSON 메시지를 처리
                     return response.json().then(errorData => {
-                        throw new Error(errorData.message);  // 예외 처리
+                        throw new Error(errorData.message);
                     });
                 }
-                return response.json();  // 정상적인 응답일 경우
-            })
-            .then(data => {
-                console.log('회원가입 성공:', data);
-                if (data.message === "회원가입이 완료되었습니다.") {
-                    alert('회원가입이 완료되었습니다!');
-                    signupModal.style.display = 'none';
-                    loginModal.style.display = 'block';
-                }
+                alert('회원가입이 완료되었습니다!');
+                window.location.reload();
+                signupModal.style.display = 'none';
+                loginModal.style.display = 'block';
             })
             .catch(error => {
                 console.error('회원가입 실패:', error);

@@ -83,7 +83,7 @@
   });
 
   function deleteCookie(name) {
-    document.cookie = name + "=; path=/; secure; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+    document.cookie = name + "=; path=/; SameSite=Lax; expires=Thu, 01 Jan 2024 00:00:00 GMT;";
   }
 
   function updateAuthButton() {
