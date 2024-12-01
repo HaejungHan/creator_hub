@@ -34,7 +34,7 @@ public class YoutubeController {
     private final KeywordAnalysisService keywordAnalysisService;
     private final RecommendationRepository  recommendationRepository;
 
-    @RequestMapping(value = "/home", method = RequestMethod.GET)
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     public String showHomePage(Model model) throws IOException {
         List<TrendKeywordDto> trendKeywords = youTubeService.getKeywordTrendsForChart();
 
