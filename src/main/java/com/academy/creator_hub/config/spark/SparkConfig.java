@@ -7,11 +7,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SparkConfig {
 
-    @Bean
+    @Bean(destroyMethod = "close")  // `close` 메서드를 자동으로 호출
     public SparkSession sparkSession() {
         return SparkSession.builder()
                 .appName("Creator_hub")
-                .master("local[*]")  // 로컬 모드에서 실행
+                .master("local[*]")
                 .getOrCreate();
     }
 }
